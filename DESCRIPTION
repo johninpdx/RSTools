@@ -1,0 +1,29 @@
+Package: RSTools
+Type: Package
+Title: Data Mangement Tools for RSiena and Other Network Packages
+Version: 0.1.0
+Authors@R: person("John", "Light", email = "jlight@ori.org",
+    role = c("aut", "cre"))
+Maintainer: John Light <jlight@ori.org>
+Description: Implements a three-tier client-server architecture to create
+    data containers that can be used for dynamic social network modeling
+    with RSiena, and other network analysis packages such as sna and
+    network. The *data tier* accesses a SQL Server database containing the
+    raw study data in three primary tables: an "edge list" representation
+    of the networks, a "long form" set of survey records, one per individual
+    per wave (assuming longitudinal data), and a table of non-time-varying
+    characteristics (e.g. gender, birthdate) with one row per individual. The
+    *logic tier* translates database-level data into objects useful for
+    network analyses in R. The *presentation tier* will be a script that
+    implements these functions to carry out network description and modeling.
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Imports:
+    data.table,
+    dplyr,
+    Matrix,
+    network,
+    RODBC,
+    RSiena
+RoxygenNote: 5.0.1
