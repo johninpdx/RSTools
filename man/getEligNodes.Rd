@@ -2,7 +2,7 @@
 % Please edit documentation in R/PInfDataFunctions.r
 \name{getEligNodes}
 \alias{getEligNodes}
-\title{Creates a vector of SIDs who were Short Survey eligible on any input wave}
+\title{Returns a vector of SIDs who were Short Survey eligible on any input wave}
 \usage{
 getEligNodes(pWavVec, pSchVec)
 }
@@ -18,7 +18,7 @@ were collected. Hence these waves should not ever be specified.}
 A (#eligible SIDs)-length numerical vector of SIDs.
 }
 \description{
-Creates a vector of SIDs who were Short Survey eligible on any input wave
+Returns a vector of SIDs who were Short Survey eligible on any input wave
 }
 \details{
 Used by other functions in this package (e.g. getNetworkSet,
@@ -27,6 +27,6 @@ Used by other functions in this package (e.g. getNetworkSet,
 \examples{
 # gets vector of SIDs for waves 1, 3, 4, and 5, schools 3-6 and 30 (one
 # school district)
-sidVec <- getSIDSet(c(1,3,4,5), c(3,4,5,6,30), 1, 1)
+sidVec <- getSIDSet(c(1, 3, 4, 5), c(3, 4, 5, 6, 30), 1, 1)
 }
 

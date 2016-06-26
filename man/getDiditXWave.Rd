@@ -2,7 +2,7 @@
 % Please edit documentation in R/PInfDataFunctions.r
 \name{getDiditXWave}
 \alias{getDiditXWave}
-\title{Output: dataframe with flags indicating survey completion}
+\title{Returns dataframe with flags indicating survey completion}
 \usage{
 getDiditXWave(pWavVec, pSchVec)
 }
@@ -26,12 +26,12 @@ A (#eligible SIDs x length(pWavVec)+1) dataframe. Col 1 is SID,
     for that wave (completion is determined in the function 'allNQQNotNA')
 }
 \description{
-Output: dataframe with flags indicating survey completion
+Returns dataframe with flags indicating survey completion
 }
 \examples{
 # gets dataframe including SIDs for waves 1, 3, 4, and 5, schools 3-6 and
 # 30 (one school district); each included SID was eligible for the Short
 # survey at least once, and completed at least 1 survey in these waves.
-sidVec <- getSIDSet(c(1,3,4,5), c(3,4,5,6,30), 1, 1)
+sidVec <- getSIDSet(c(1, 3, 4, 5), c(3, 4, 5, 6, 30), 1, 1)
 }
 

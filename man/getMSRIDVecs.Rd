@@ -2,7 +2,7 @@
 % Please edit documentation in R/PInfDataFunctions.r
 \name{getMSRIDVecs}
 \alias{getMSRIDVecs}
-\title{Creates a list of *Row* ID vectors for each middle school requested}
+\title{Returns a list of *Row* ID vectors for each middle school requested}
 \usage{
 getMSRIDVecs(mSchVec, sidRowID)
 }

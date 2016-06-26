@@ -32,7 +32,7 @@
 # _____________________________________________________________________________
 # Uses: getNQTVCs, AllNQNotNA, pkg 'RODBC' (indirect)
 # _____________________________________________________________________________
-#' Output: dataframe with flags indicating survey completion
+#' Returns dataframe with flags indicating survey completion
 #'
 #' @param pWavVec An ordered numeric vector of wave SIDs to be included in the
 #'     analysis.
@@ -50,7 +50,7 @@
 #' # gets dataframe including SIDs for waves 1, 3, 4, and 5, schools 3-6 and
 #' # 30 (one school district); each included SID was eligible for the Short
 #' # survey at least once, and completed at least 1 survey in these waves.
-#' sidVec <- getSIDSet(c(1,3,4,5), c(3,4,5,6,30), 1, 1)
+#' sidVec <- getSIDSet(c(1, 3, 4, 5), c(3, 4, 5, 6, 30), 1, 1)
 getDiditXWave <- function(pWavVec,pSchVec){
   #Get a node list of all eligible, so the output DF records participation
   #  for all eligible at any wave
@@ -77,7 +77,7 @@ getDiditXWave <- function(pWavVec,pSchVec){
 # Uses:
 #    getSWNodes, pkgs 'RODBC' (indirect)
 # _____________________________________________________________________________
-#' Creates a vector of SIDs who were Short Survey eligible on any input wave
+#' Returns a vector of SIDs who were Short Survey eligible on any input wave
 #'
 #' @param pWavVec An ordered numeric vector of wave SIDs to be included in the
 #'     analysis.
@@ -90,7 +90,7 @@ getDiditXWave <- function(pWavVec,pSchVec){
 #' @examples
 #' # gets vector of SIDs for waves 1, 3, 4, and 5, schools 3-6 and 30 (one
 #' # school district)
-#' sidVec <- getSIDSet(c(1,3,4,5), c(3,4,5,6,30), 1, 1)
+#' sidVec <- getSIDSet(c(1, 3, 4, 5), c(3, 4, 5, 6, 30), 1, 1)
 getEligNodes <- function(pWavVec, pSchVec){
   # For efficiency, we create a list of
   # length w x s and create a vector of SIDs for each school/wave combination
@@ -110,7 +110,7 @@ getEligNodes <- function(pWavVec, pSchVec){
 # _____________________________________________________________________________
 # Uses: getSWNodes, pkg 'RODBC' (indirect)
 # _____________________________________________________________________________
-#' Creates a dataframe with flags x wave for Short Survey eligibility
+#' Returns a dataframe with flags x wave for Short Survey eligibility
 #'
 #'     The function is used to determine analyses sets (viz., by
 #'     'getNetworkSet', 'makeTVTbl', 'getFixedCovs', and 'makeCCVec').
@@ -167,7 +167,7 @@ getEligXWave <- function(pWavVec,pSchVec){
 # _____________________________________________________________________________
 # Uses: getSWNodes
 # _____________________________________________________________________________
-#' Creates a list of *Row* ID vectors for each middle school requested
+#' Returns a list of *Row* ID vectors for each middle school requested
 #'
 #'     The function is used for multiple middle school districts to
 #'     add structural zeros to a wave 1 network edge table.
@@ -203,7 +203,7 @@ getMSRIDVecs <- function(mSchVec, sidRowID){
 #______________________________________________________________________________
 # Uses:  getNetwork, pkgs 'network', 'Matrix', 'RODBC'
 # _____________________________________________________________________________
-#' Creates a list of networks forming a longitudinal Analysis Set
+#' Returns a list of networks forming a longitudinal Analysis Set
 #'
 #' An Analysis Set is a set of observations satisfying a particular set of
 #'     criteria to be included in an analysis. Requiring complete
@@ -256,10 +256,12 @@ getMSRIDVecs <- function(mSchVec, sidRowID){
 #' # 2 or more surveys. Networks are defined as 'Best Friends'. Output
 #' # networks are in dgTSparse format, and the Wave 1 middle schools
 #' # have structural zeros between individuals in different schools.
-#' netList <- getNetworkSet(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30),
-#'     pElig = 2, pDid = 2, pTyp = "BF", pOut = "SP", pS0 = "S0")
+#' netList <- getNetworkSet(pWavVec = c(1, 3, 4),
+#'                          pSchVec = c(3, 4, 5, 6, 30),
+#'                          pElig = 2, pDid = 2, pTyp = "BF",
+#'                          pOut = "SP", pS0 = "S0")
 #' # Create SAOM longitudinal network object 'myNet'
-#' myNet <- sienaNet(netList[1:3],sparse=T)
+#' myNet <- sienaNet(netList[1:3], sparse=T)
 #' # Even easier way, using 'makeSAOMNet' wrapper function
 #' myNet2 <- makeSAOMNet(netList)
 getNetworkSet <- function(pWavVec, pSchVec, pElig=1, pDid=1, pTyp="BF",
@@ -413,7 +415,7 @@ getNetworkSet <- function(pWavVec, pSchVec, pElig=1, pDid=1, pTyp="BF",
 # Uses:  getEligXWave, getDidItXWave, pkgs 'network', 'Matrix'
 # Used by: getNetworkSet
 # _____________________________________________________________________________
-#' Creates a vector of SIDs that are consistent with some Analysis Set
+#' Returns a vector of SIDs that are consistent with some Analysis Set
 #'
 #' This function is a bit slow, probably because it uses calls to
 #'     'getEligXWave' and 'getDiditXWave'...but it still runs in a couple
@@ -433,9 +435,7 @@ getNetworkSet <- function(pWavVec, pSchVec, pElig=1, pDid=1, pTyp="BF",
 #'     Could be used stand-alone but is not really designed to be.
 #' @examples
 #' # Obtains the SID set for a network analysis:
-
-#' # Use the last element of 'netList', which is a vector of the SIDs in
-#' # the analysis
+#' SIDVec <- getSIDSet(c(1, 3, 4), c(3, 4, 5, 6, 30))
 getSIDSet <- function(pWavVec, pSchVec, pElig=1, pDid=1){
   #_______________________
   require(network, Matrix)
@@ -476,7 +476,7 @@ getSIDSet <- function(pWavVec, pSchVec, pElig=1, pDid=1){
 # _____________________________________________________________________________
 # Uses: pkgs 'Matrix, 'RSiena' (or 'RSienaTest')
 # _____________________________________________________________________________
-#' Creates a longitudinal 'sienaNet' object directly from 'getNetworkSet'
+#' Returns a longitudinal 'sienaNet' object directly from 'getNetworkSet'
 #'
 #' This function is a very thin wrapper for RSiena::sienaDependent (or
 #'     equivalently, 'sienaNet'), saving maybe half a line of code. It takes
@@ -494,7 +494,7 @@ getSIDSet <- function(pWavVec, pSchVec, pElig=1, pDid=1){
 #' @examples
 #' # 'net' will be a 'sienaNet' network dependent variable:
 #'   net <- makeSAOMNet(getNetworkSet(pWavVec = c(1,3,4),
-#'     pSchVec = c(3,4,5,6,30),
+#'     pSchVec = c(3, 4, 5, 6, 30),
 #'     pElig = 2, pDid = 2, pTyp = "BF", pOut = "SP", pS0 = "S0"))
 makeSAOMNet <- function(pNetInput){
   #__________________
@@ -516,7 +516,7 @@ makeSAOMNet <- function(pNetInput){
 # _____________________________________________________________________________
 # Uses: getTVCCols, pkgs dplyr, data.table
 # _____________________________________________________________________________
-#' Creates a data.table of a time varying behavior variable
+#' Returns a data.table of a time varying behavior variable
 #'
 #' @param pCCTbl A dataframe or data.table of all the time-varying covariates
 #'  in long-form (1 row per subject per wave) produced by the function
@@ -531,10 +531,10 @@ makeSAOMNet <- function(pNetInput){
 #'     closed on the left, open on the right.
 #' @param pMaxNA The maximum number of NAs among the variable's items
 #'     before the returned value for the particular subject-wave is set to NA
-#' @return The table format is w+1 columns (w=#waves present in pCCTbl); first
-#'     column is an ordered set of SIDs, columns 2:(w+1) are the scored
-#'     (mean of items) value of the requested behaivor variable
-#'     for the w waves.
+#' @return The output table format is w+1 columns (w=#waves present in
+#'     pCCTbl); first column is an ordered set of SIDs, columns 2:(w+1)
+#'     are the scored (mean of items) value of the requested behaivor
+#'     variable for the w waves.
 #' @details May be used to create tables that can be easily converted to SAOM
 #'     dependent behavior or time-varying covariate (predictor) variables by
 #'     just selecting the last w columns (see example below). Generally such
@@ -568,7 +568,7 @@ makeSAOMNet <- function(pNetInput){
 #' # for the 3 waves & other criteria used above, grouped into 4 categories,
 #' # and with no more than 3 NAs out of the 6 items.
 #' abTbl <- makeTVTbl(ccTbl, netList[[4]], pVar = "AB",
-#'     pCut = c(0,.5,1,5,20), pMaxNA = 3)
+#'     pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
 makeTVTbl <- function(pCCTbl, pSIDs, pVar="X", pCut = c(0), pMaxNA = 1){
   require(dplyr, data.table)
   if (pVar == "X"){
@@ -612,22 +612,26 @@ makeTVTbl <- function(pCCTbl, pSIDs, pVar="X", pCut = c(0), pMaxNA = 1){
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> s0Assemble <<
-# FFFFFFFFFFFFFFFFF
-# Output:
-#   A (typically large) *data.table* (new, improved 'dataframe') with columns
-#    * rNum (row number)
-#    * RIDOut (row # chooser)
-#    * RIDIn (row # chosen)
-#    * bff (relationship code, set to 10 for SAOM structural 0)
-#    * WID (set to 1, because S0's are only relevant to wave 1 schools)
 # _____________________________________________________________________________
-# Input:
-#    pMSchVec: list of vectors, each containing the Wave 1 analysis set RowIDs
-#              for a specific middle school (identity irrelevant)
+# Uses: s0Make
+# Used by: getNetworkSet
 # _____________________________________________________________________________
-# Used by: getNetworkSet (to add structural zero edges to sparse matrix output)
-# Uses: s0Make (which uses pkg 'data.table')
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+#' Returns a data.table with structural 0's for w1 middle schools
+#'
+#' This is a 'helper' function which, along with s0Make, adds rows of
+#'     structural zeros for individuals from different middle schools
+#'     who, however, will be going to the same high school the next
+#'     year...and are thus considered part of the same network, for
+#'     analysis purposes.
+#'
+#' @param pMSchVec A list of vectors, each containing the Wave 1 Analysis Set
+#'     RowIDs (because Network Sets use RowIDs, as required by RSiena and
+#'     network) for a specific middle school.
+#' @return A data.table in edgelist format; cols are RowID (chooser),
+#'     RowID (chosen), bff (value of the relationship, an integer >= 0),
+#'     and WID (wave ID #)
+#' @note This function should not normally be used stand-alone. To see how it
+#'     is used in context, consult the source code for 'getNetworkSet'.
 s0Assemble <- function(pMSchVec){
   # Calculate number of combinations (order irrelevant)
   ll <- choose(length(pMSchVec),2)
@@ -648,21 +652,32 @@ s0Assemble <- function(pMSchVec){
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> s0make <<
-#FFFFFFFFFFFFFFFFFFF
-# Output:
-#   An n x k data TABLE in the format of the variable 'rlpNet', used inside
-#   function 'getNetworkSet', with a set of STRUCTURAL ZERO edges added
-#   between the cartesion product of the two vectors of RowIDs.
-# _____________________________________________________________________________
-# Input:
-#  --Two vectors of (not necessarily consecutive or ordered) RowIDs, of lengths
-#    n and k.
-#  --Note: since only Wave 1 schools are considered 'separate networks', this
-#    function always sets wave (WID) to 1.
 # _____________________________________________________________________________
 # Used by: s0Assemble (which is called by getNetworkSet)
 # Uses: pkg 'data.table'
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# _____________________________________________________________________________
+#' Returns a data.table of structural 0 edges between 2 schools
+#'
+#' This is a 'helper' function which, along with s0Assemble, adds rows of
+#'     structural zeros for individuals from different middle schools
+#'     who, however, will be going to the same high school the next
+#'     year...and are thus considered part of the same network, for
+#'     analysis purposes.
+#'
+#' @param pVec1 A vector of the RowIDs (note: not SIDs!) in middle school 1.
+#' @param pVec2 A vector of the RowIDs in middle school 2.
+#' @return A data.table in edgelist format; cols are RowID (chooser),
+#'     RowID (chosen), bff (value of the relationship, an integer >= 0),
+#'     and WID (wave ID #).
+#' @details To make connections between two wave 1 middle schools impossible,
+#'     all you need to do is create an edge with value '10 (structural zero,
+#'     in RSiena terminology) between each pair of individuals in the two
+#'     schools. This function accomplishes that in a simple but efficient way.
+#'     The function 's0Assemble' takes all the data.table objects
+#'     created here and assembles them into one big table to return to the
+#'     calling function.
+#' @note This function should not normally be used stand-alone. To see how it
+#'     is used in context, consult the source code for 'getNetworkSet'.
 s0Make <- function(pVec1, pVec2){
   require(data.table)
 
@@ -689,13 +704,22 @@ s0Make <- function(pVec1, pVec2){
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> getDOB <<
-#FFFFFFFFFFFFFF
-# This function gets DOB for these schools & waves.
 # _____________________________________________________________________________
-# Input is a vector of SIDs, typically a set of kids you're doing
-# data analysis on.
-# Output is a dataframe with two columns: SID (sort order) and DOB
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# Uses: RODBC
+# _____________________________________________________________________________
+#' Returns a data.table with DOBs for all SIDs input
+#'
+#' This function can be used to calculate an age variable
+#'
+#' @param pSIDVec A vector of SIDs for which DOB is wanted. These will
+#'     normally be part of an 'Analysis Set', i.e. generated by
+#'     'getNetworkSet' or 'getSIDSet'.
+#' @return A data.table with two columns: SID and DOB. SID is integer,
+#'     DOB is POSIXct/POSIxt
+#' @details Makes a call to the database using RODBC
+#' @examples
+#' # Gets DOB for a couple of specific SIDs
+#' aFewDOBs <- getDOB(c(10, 11, 12))
 getDOB <- function(pSIDVec){
   require(RODBC)
   dobQuery <- paste ("SELECT SID,DOB",
@@ -710,14 +734,34 @@ getDOB <- function(pSIDVec){
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> getFixedCovs <<
-#FFFFFFFFFFFFFFFFFFFF
+# _____________________________________________________________________________
 # This function gets all SMaster records for these schools & waves.
 # _____________________________________________________________________________
 # Obtains dataframe of fixed NQ data (from the table 'SMaster' in the
 # database 'PInf1'), for one " (pSchVec)"school cohort".
 # To get only the SIDs for a given set of waves, you have to select the
 # relevant SIDs first with other code, then select from this data frame.)
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# _____________________________________________________________________________
+# Uses: RODBC
+# _____________________________________________________________________________
+#' Returns a dataframe of fixed covariates for a set of input schools
+#'
+#' This is generally used to pull this data from the database, and
+#'     subsequently subset it for a particular Analysis Set.
+#'
+#' @param pSchVec A vector of (integer) School IDs; any existing fixed
+#'     covariate rows in the database where the participant is shown
+#'     as currently in one of these schools will be included.
+#' @return A dataframe that has the same format as the database table
+#'     'PInf.dbo.SMaster'. Column names fairly accurately describe
+#'     column contents, but one should consult the qq codebook for
+#'     precise definition.
+#' @details If a participant switches schools (which happens regularly),
+#'     this function will only pull his/her data if his/her *current*
+#'     school is in the input vector.
+#' @examples
+#' # Gets table of fixed covariats for all the schools in 1 district
+#' fc <- getFixedCovs(c(3,4,5,6,30)
 getFixedCovs <- function(pSchVec){
   require(RODBC)
   smQuery <- paste ("SELECT * From PInf1.dbo.SMaster WHERE SID IN ",
@@ -732,15 +776,33 @@ getFixedCovs <- function(pSchVec){
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> getNetwork <<
-#FFFFFFFFFFFFFFFFFF
-# Output: a dataframe of network data (edgelist format)
-#______________________________________________________________________________
-# Input:
-#    pWavVec: ordered integer vector of wave numbers
-#    pSchVec: ordered integer vector of school IDs
 #______________________________________________________________________________
 # Uses: pkg 'RODBC'
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# Used by: getNetworkSet
+# _____________________________________________________________________________
+#' Returns a dataframe of network edges for input schools and waves
+#'
+#' This is generally used to pull this data from the database, and
+#'     subsequently subset it for a particular Analysis Set. It is
+#'     currently used by 'getNetworkSet'.
+#'
+#' @param pWavVec An ordered numeric vector of wave SIDs to be included in the
+#'     analysis.
+#'     Waves 2, 6, and 10 are summer waves; no Short Survey or Long Survey data
+#'     were collected. Hence these waves should not ever be specified.
+#' @param pSchVec A vector of (integer) School IDs.
+#' @return A dataframe that has the same format as the database table
+#'     'PInf.dbo.SAffiliation'. Column names fairly accurately describe
+#'     column contents, but one should consult the qq codebook for
+#'     precise definition.
+#' @details Chooser was asked for more information on an individual (if any)
+#'     designated as Chooser's 'very best friend'. These variables are
+#'     missing for any alters not so designated, or if Chooser did not
+#'     make this designation at all.
+#' @examples
+#' # Gets edgelist (with addtional info on some alters) for individuals in
+#' # waves 1, 3, and 4, schools 3:6 and 30 (one school district).
+#' net <- getNetwork(c(1,3,4), c(3,4,5,6,30))
 getNetwork <- function(pWavVec,pSchVec){
   require(RODBC)
   dbQuery <- paste("SELECT * From PInf1.dbo.SAffiliation ",
@@ -753,21 +815,36 @@ getNetwork <- function(pWavVec,pSchVec){
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> getNQTVCs <<
-#FFFFFFFFFFFFFFFFF
-# Output:
-#   A data.table of time-varying NQ data (from the table 'SWave' in the
-#   database 'PInf1')
-#______________________________________________________________________________
-# Input:
-#    pWavVec: integer vector of wave numbers
-#    pSchVec: integer vector of school IDs
 #______________________________________________________________________________
 # Uses: pkgs 'RODBC', 'data.table'
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# Used by: 'makeTVTbl'
+# _____________________________________________________________________________
+#' Returns a data.table of Short-Survey time-varying covariates
+#'
+#' This is generally used to pull this data from the database, and
+#'     subsequently subset it for a particular Analysis Set. It is
+#'     currently used by 'makeTVTbl'.
+#'
+#' @param pWavVec An ordered numeric vector of wave SIDs to be included in the
+#'     analysis.
+#'     Waves 2, 6, and 10 are summer waves; no Short Survey or Long Survey data
+#'     were collected. Hence these waves should not ever be specified.
+#' @param pSchVec A vector of (integer) School IDs.
+#' @return A dataframe that is a subset of the database table
+#'     'PInf.dbo.SWave'., containing only the items asked on the 'Short Survey'.
+#'     Column names fairly accurately describe
+#'     column contents, but one should consult the qq codebook for
+#'     precise definition.
+#' @examples
+#' # Gets a long-form data.table (each row represents an individual and a wave)
+#' # of survey data from the 'Short Survey', for
+#' # waves 1, 3, and 4, schools 3:6 and 30 (one school district).
+#' tvcs <- getNQTVCs(c(1, 3, 4), c(3, 4, 5, 6, 30))
 getNQTVCs <- function(pWavVec,pSchVec){
   require(RODBC,data.table)
-  nqQuery <- paste ("SELECT SchID, SID, WID, ULied,UHit,UMean,USkip,UDamage,ULate,UFam,",
-                    "UOKids,ONames,OHit,OThreat,ONoTalk,OExclu,OGossip,OEncourg,",
+  nqQuery <- paste ("SELECT SchID, SID, WID, ULied,UHit,UMean,USkip,UDamage,
+                     ULate,UFam,","UOKids,ONames,OHit,OThreat,ONoTalk,OExclu,
+                     OGossip,OEncourg,",
                     "YNoTalk,YExclu,YGossip,YLies,YEncourg,TobLife,Tob30Day,",
                     "ETobLife,ETob30Day,ChewLife,Chew30Day,AlcLife,Alc30Day,",
                     "BngLife,Bng30Day,MJLife,MJ30Day,OptOutNow ",
@@ -782,23 +859,29 @@ getNQTVCs <- function(pWavVec,pSchVec){
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> getSWNodes <<
-#FFFFFFFFFFFFFFFF
-# Output: A vector of nodes (SIDs) for individuals who are NQ (only) or
-#         NQ + FQ eligible (dep on parameters).
-#
-# Get survey-eligible nodelist for a *specific* school (pSch) and wave (pWav),
-# (hence the 'SW' in the function name)
-# who have done a NetQ (pNQW) or a FullQ (pFQW).
-# (You can't ask for both NQ and FQ, it's one or the other)
-# _____________________________________________________________________________
-# Input:
-#    pWavVec: integer vector of wave numbers
-#    pSchVec: integer vector of school IDs
-#    pNQW: If 1, produces NQ-elig nodes during this wave for this school
-#    pFQ:  If 1, produces FQ-elig nodes only (pNQW must be 0)
 # _____________________________________________________________________________
 # Uses: pkgs 'RODBC', 'data.table'
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# Used by: getEligNodes, getEligXWave, getMSRIDVecs
+# _____________________________________________________________________________
+#' Returns a vector of SIDs for Short or Long-form survey-eligibles
+#'
+#' Output from this function is useful in creating subsets of data meeting
+#'     survey-eligibility requirements.
+#'
+#' @param pWav A specific survey wave.
+#'     Waves 2, 6, and 10 are summer waves; no Short Survey or Long Survey data
+#'     were collected. Hence these waves should not ever be specified.
+#' @param pSch A specific School ID.
+#' @param pNQW  If 1, short-survey-eligible SIDs in this wave and school
+#'     are returned (this would also include long-survey-eligibles as a
+#'     subset).
+#' @param pFQ If 1, only long-survey-eligible SIDs in this wave and school are
+#'     returned.
+#' @return An integer vector of SIDs
+#' @examples
+#' # Returns a vector of SIDs of individuals who were short-survey (NQ)
+#' # eligible at wave 1, from school #3.
+#' nodes <- getNQTVCs(pWav = 1, pSch = 3, pNQW = 1)
 getSWNodes <- function(pWav, pSch, pNQW = 1, pFQW = 0){
   require(RODBC, data.table) # NOTE: data.table syntax
   # Infer cohort from SchID
@@ -855,15 +938,25 @@ getSWNodes <- function(pWav, pSch, pNQW = 1, pFQW = 0){
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> allNQQNotNA <<
-#FFFFFFFFFFFFFFFFFFF
-# Adds a variable 'DidIt' to the input dataframe pDF of the NQ questions
-# (e.g. output of 'getNqTVCs').
-#_____________________________________________________________________________-
-# 'DidIt'=1 if kid answered any of 4 lifetime SU questions, or 2 of the
-# AB questions, and =0 otherwise.
-# Weeds out kids who have a an SWave record but did not actually do the
-#  survey.
-#_____________________________________________________________________________
+#______________________________________________________________________________
+# Used by: getDiditXWave
+#______________________________________________________________________________
+#' Returns input dataframe of short survey questions with 'DitIt' flag.
+#'
+#' Used by 'getDididXWave' to create a wide-format dataframe indicating survey
+#'     completion for each of a selected set of waves, by SID.
+#'
+#' @param pDF The dataframe produced by 'getNQTVCs'.
+#' @return The long-form dataframe of time varying covariates (returned by
+#'     getNQTVCs) with a column 'DidIt' added, which has the value one if
+#'     any of the questions addressed below (lifetime substance use questions)
+#'     were answered, 0 otherwise.
+#' @details Used by 'getDidItXWave' to set values for the returned dataframe.
+#' @examples
+#' # Returns the table of time varying covariates produced by 'getNQTVCs' with
+#' # the column 'DidIt' added, for the schools and waves in pSchVec and pWavVec.
+#' tvc <- allNQQNotNA(getNQTVCs(pWavVec = c(1, 3, 4),
+#'                              pSchVec = c(3, 4, 5, 6, 30)))
 allNQQNotNA <- function(pDF){
   pDF$DidIt <- ifelse(!is.na(pDF$ULied) | !is.na(pDF$UHit)
                       | !is.na(pDF$TobLife)
@@ -875,23 +968,35 @@ allNQQNotNA <- function(pDF){
 
 # FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> createOnset <<
-#FFFFFFFFFFFFFFFFFFF
-# Output: data.table (or dataframe) with SID followed by onset variables
-# in each row.
-# __________________
-# Input:
-#  -- pInDT: A data.table (or dataframe) containing SID plus a lifetime use
-#     (NA, 0, >0) variable for each of c-1 ordered time periods, where c is
-#     the number of columns in each DF.
-#  -- pTHold: a number indicating the threshold value for onset; default is
-#     1 (typically, any use). Onset = 1 if input value >= pTHold.
-# NOTE:
-# This function assumes there could be reporting error, i.e. a later column
-#   value could be 0, though an earlier one was not. It assumes the first
-#   positive event (ignorning NAs) is correct and everything before was 0.
-# There is also an implicit assumption that NA==0; hence this function
-#   codes the first KNOWN onset.
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# _____________________________________________________________________________
+#' Returns data.table of binary, up-only 'onset' variables x wave
+#'
+#' This is a stand-alone scoring function that takes a wide-form data.table
+#'     or dataframe of 'lifetime use' variables for a (presumably consecutive)
+#'     set of waves, and transforms them into up-only variables with the value
+#'     1 when the participant first reports any lifetime use (zero prior to that).
+#'
+#' @param pInDT A data.table (or dataframe) containing SID plus a lifetime use
+#'     (NA, 0, >0) variable for each of c-1 ordered time periods, where c is
+#'     the number of columns in the DF.
+#' @param pTHold The threshold (numerical value) for lifetime use; if the input
+#'     use variable value is >= pTHold, then the event 'occurred'.
+#' @return A data.table of the same dimension as the input data table, with rows
+#'     transformed into up-only variables suitable for use in proportional
+#'     hazard models, or onset/rate models (in RSiena)
+#' @details The logic assigns 1's to the output variables for all waves after the
+#'     first *known* positive instance (value >= pTHold) of the event. It also
+#'     ignores instances where a participant reports the event at wave w, but
+#'     then does not report any lifetime use at some wave w+k. Instead, the
+#'     value of the onset variable will be 1 from the first instance of the event
+#'     on. Also if there are NAs prior to an event being observed, these are all
+#'     output as zeros.
+#' @examples
+#' # Returns a table of up-only variables which have the value 0 before the
+#' # first known lifetime alcohol use (if any such times are available), and 1
+#' # thereafter. The pTHold value of 1 means *any* use.
+#' alcLife <- makeTVTbl(getNQTVCs(c(1,3,4),c(3,4,5,6,30)))
+#' alcOnset <- createOnset(alcLife,pTHold = 1)
 createOnset <- function(pInDT,pTHold=1){
   colnum <- dim(pInDT)[2]
   rownum <- dim(pInDT)[1]
@@ -915,11 +1020,38 @@ createOnset <- function(pInDT,pTHold=1){
 
 # FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> createNbhdOnset
-# FFFFFFFFFFFFFFFFF
-# This is like 'createNewOnset' except the first onset event is lagged 1
-# wave, to show the 'Onset Neighborhood' the individual had in the wave
-# prior to onset. This is the wave that serves to 'condition' onset in SAOM.
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+#______________________________________________________________________________
+#' Returns data.table of *lagged* binary, up-only 'onset' variables
+#'
+#' This stand-alone scoring function takes a wide-form data.table
+#'     or dataframe of 'lifetime use' variables for a (presumably consecutive)
+#'     set of waves, and transforms them into up-only variables. Event onset is
+#'     lagged one period. This data.table can be useful descriptively, because it
+#'     shows the 'network neighborhood' of individuals in the wave before they
+#'     onset to use. It is this neighborhood which presumably influenced onset
+#'     (if there was any such influence).
+#'
+#' @param pInDT A data.table (or dataframe) containing SID plus a lifetime use
+#'     (NA, 0, >0) variable for each of c-1 ordered time periods, where c is
+#'     the number of columns in the DF.
+#' @param pTHold The threshold (numerical value) for lifetime use; if the input
+#'     use variable value is >= pTHold, then the event 'occurred'.
+#' @return A data.table of the same dimension as the input data table, with rows
+#'     transformed into up-only variables suitable for descriptive use.
+#' @details The logic assigns 1's to the output variables for all waves after the
+#'     first *known* positive instance (value >= pTHold) of the event. It also
+#'     ignores instances where a participant reports the event at wave w, but
+#'     then does not report any lifetime use at some wave w+k. Instead, the
+#'     value of the onset variable will be 1 from the first instance of the event
+#'     on. Also if there are NAs prior to an event being observed, these are all
+#'     output as zeros. These considerations all still apply, even though the
+#'     onset event is lagged one period.
+#' @examples
+#' # Returns a table of 1-period lagged up-only variables which have the value 0
+#' # before the first known lifetime alcohol use (if any such times are
+#' # available), and 1 thereafter. The pTHold value of 1 means *any* use.
+#' alcLifeLag <- makeTVTbl(getNQTVCs(c(1, 3, 4), c(3, 4, 5, 6, 30)))
+#' alcOnsetLag <- createOnset(alcLifeLag, pTHold = 1)
 createNbhdOnset <- function(pInDT,pTHold=1){
   # pInDT is a data.table (or dataframe) with 1 row for each subject.
   # The first column is SID
@@ -953,11 +1085,44 @@ createNbhdOnset <- function(pInDT,pTHold=1){
 
 # FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> createNewOnset
-# FFFFFFFFFFFFFFFFF
-# This is like 'createOnset' except the first onset event is 1, and all later
-# values are 2. It is a way to identify NEW onsets, e.g. in a set of network
-# plots, etc.
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# _____________________________________________________________________________
+#' Returns data.table of lag-1 onset variables with 3 different values
+#'
+#' This stand-alone scoring function takes a wide-form data.table
+#'     or dataframe of 'lifetime use' variables for a (presumably consecutive)
+#'     set of waves, and transforms them into variables with the value 0 prior
+#'     to first known alcohol use, 1 if the individual is about to onset in the
+#'     next wave, and 2 if he/she had already onset at some earlier wave. The
+#'     onset event is lagged one wave (as for 'createNbhdOnset').
+#' The variables returned by this function provide a particularly nice
+#'     descriptive context for onset events--if you graph them in a network
+#'     plot and assign, say, different node colors to each value, you can see
+#'     who had or had not started (drinking, say) as of
+#'     wave w, along with affiliations of everyone who was about to start in
+#'     the next wave.
+#'
+#' @param pInDT A data.table (or dataframe) containing SID plus a lifetime use
+#'     (NA, 0, >0) variable for each of c-1 ordered time periods, where c is
+#'     the number of columns in the DF.
+#' @param pTHold The threshold (numerical value) for lifetime use; if the input
+#'     use variable value is >= pTHold, then the event 'occurred'.
+#' @return A data.table of the same dimension as the input data table, with rows
+#'     transformed into up-only variables suitable for descriptive use.
+#' @details The logic assigns 1's to the output variables for all waves after the
+#'     first *known* positive instance (value >= pTHold) of the event. It also
+#'     ignores instances where a participant reports the event at wave w, but
+#'     then does not report any lifetime use at some wave w+k. Instead, the
+#'     value of the onset variable will be 1 from the first instance of the event
+#'     on. Also if there are NAs prior to an event being observed, these are all
+#'     output as zeros. These considerations all still apply, even though the
+#'     onset event is lagged one period.
+#' @examples
+#' # Returns a table of 1-period lagged up-only variables which have the value 0
+#' # before the first known lifetime alcohol use (if any such times are
+#' # available), 1 on the occasion prior to onset, and 2 thereafter.
+#' # The pTHold value of 1 means *any* use.
+#' alcLifeLag <- makeTVTbl(getNQTVCs(c(1, 3, 4), c(3, 4, 5, 6, 30)))
+#' alcOnsetLag <- createOnset(alcLifeLag, pTHold = 1
 createNewOnset <- function(pInDT,pTHold=1){
   # pInDT is a data.table (or dataframe) with 1 row for each subject.
   # The first column is SID
@@ -984,19 +1149,35 @@ createNewOnset <- function(pInDT,pTHold=1){
   return(OutDT)
 }
 
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> getTVCCols <<
-# FFFFFFFFFFFFFFFFFFFFF
-
-# THIS WORKS BUT IS USED ONLY BY THE  FUNCTION 'getTVCs', WHICH IS NOT FINISHED
-
-# Given an input variable code, this function returns a vector of the
-#  column names from 'SWave' (generated also by 'getNQTVCs') that will
-#  need to be used (or aggregated) to produce the desired measure
-#
-# NetQ Only So Far <<<<<<------ !!!!
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-
+# _____________________________________________________________________________
+#' Returns a vector of column (item) names for a scale or variable
+#'
+#' Used by 'getNQTVCs' to obtain the items necessary for a scale (or in some
+#'     cases, just a single items, e.g. 'number of days drank, last 30'). It
+#'     has the effect of generalizing 'getNQTVCs' so that the call to that
+#'     function is compact, and does not require the user to go find the
+#'     names of the items in any given scale.
+#'
+#' @param pVar A string giving one of the abbreviations for a variable
+#'     understood by the function. See below for a list of possible values.
+#' @return A vector of strings corresponding to the names of the items
+#'     comprising a variable in the database table 'PInf1.dbo.SWave'
+#' @note Choices for pVar are:
+#'     AB (Antisocial behavior),
+#'     OV (Others victimization of you),
+#'     YV (You victimizing others),
+#'     T3 (Tobacco, freq of use in last 30 days),
+#'     E3 (E-tobacco, freq of use in last 30 days),
+#'     C3 (Chewing Tobacco, freq of use in last 30 days),
+#'     A3 (Alcohol, freq of use in last 30 days),
+#'     B3 (Binge drinking, freq in last 30 days),
+#'     M3 (Marijuana use, freq in last 30 days),
+#'     AL (Alcohol, freq of use, lifetime)
+#' @examples
+#' # Internal function, not normally available to users. See 'makeTVTbl'
+#' # source code to see how it is used.
 getTVCCols <- function(pVar){
   if (!(pVar %in% c("AB", "OV", "YV", " T3", "E3", "C3", "A3",
                     "B3", "M3","AL"))){
@@ -1046,95 +1227,29 @@ getTVCCols <- function(pVar){
   return(outCols)
 }
 
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-# >> netvtxAttr <<
-#FFFFFFFFFFFFFFFFF
-# Output:
-#   a DF with col.2 OK for assignment a to a 'network' object as a
-#   NODE ATTRIBUTE
-# _____________________________________________________________________________
-# Input:
-#  pAttrMasterDF: A 2-col data frame with SID and the vals of some variable 'x'
-#                 for at least all SIDs in the school and wave range, for
-#                 which there are data (if no data, attribute will be 'NA')
-#  pSIDVec: A vector of SIDs exactly matching the 'node set' for the network
-#           of interest (e.g. if the network has n nodes, this vector is of
-#           length n) -- this will be the length of the vertex DF returned.
-#  pNetwork: the 'network' object to assign the vertex attribute to
-#
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-netVtxAttr <- function(pAttrMasterDF,pSIDVec,pNetwork) {
-  # Check a few things
-  if (length(pAttrMasterDF)!=2){
-    stop("Dataframe containing attributes does not have 2 cols.")
-  }
-  if (length(pNetwork$oel)!=length(pSIDVec)){
-    stop("Network vertex count not equal to # SIDs (pSIDVec)")
-  }
-  # make sure everything is in order, because vertex attributes are
-  # assigned based on some original order of the nodes, which in our
-  # case will correspond to SID order
-  pAttrMasterDF <- pAttrMasterDF[order(pAttrMasterDF$SID),]
-  pSIDVec <- sort(pSIDVec)
-  targDF <- merge(as.data.frame(pSIDVec),pAttrMasterDF,
-                  by.x = getNameAsString(pSIDVec), by.y = "SID", all.x = T)
-  names(targDF)[1] <- "SID"
-  return(targDF)
-}
-
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-# >> zero30dSU <<
-#FFFFFFFFFFFFFFFFF
-# Zeros out last-30-day subs use in a DF containing both lifetime and
-#  30-day substance use, if lifetime use is 0
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-zero30dSU <- function(pDF){
-  # The pDF has to be an object created by 'getNQVTCs' or equivalent
-  cct <- transform(pDF,
-                   Tob30Day = ifelse(TobLife==0,0,Tob30Day),
-                   ETob30Day = ifelse(ETobLife==0,0,ETob30Day),
-                   Chew30Day = ifelse(ChewLife==0,0,Chew30Day),
-                   Alc30Day = ifelse(AlcLife==0,0,Alc30Day),
-                   Bng30Day = ifelse(BngLife==0,0,Bng30Day),
-                   MJ30Day = ifelse(MJLife==0,0,MJ30Day)
-  )
-  return (cct)
-}
-
-# Utility Fns -----------------------------------------------------------------
-
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-# >> addRow <<
-#FFFFFFFFFFFFFF
-# This function adds a row to a dataframe. It replaces rbind, which is very
-# slow. The rows are tacked on to the end of the DF. It's still a bad way to
-# add rows!
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-addRow <- function(existingDF, newrow) {
-  r<-dim(existingDF)[1]
-  existingDF[r+1,] <- newrow
-  existingDF
-}
-
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-# >> getNameAsString <<
-#FFFFFFFFFFFFFFFFFFFFFFF
-# You give it a variable, it gives you a character string of the variable's
-#  name
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-getNameAsString <- function(pVarName){
-  deparse(substitute(pVarName))
-}
-
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> makeCCVec <<
-#FFFFFFFFFFFFFF
-# This function creates a GENERAL comp-change list.
-#_____________________________________________________________________________
-#pElig is an n x 1+w dataframe, with 1 row for every kid who was survey-eligible
-# for any of the waves of interest, and 1 col for each wave, containing 1 if
-# the kid was survey-eligible that wave, and 0 if not (col 1 is SID)
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# ____________________________________________________________________________
+#' Returns a list of vectors representing RSiena composition change.
+#'
+#' The output of this function may be input directly to the RSiena function
+#'     'sienaCompositionChange'.
+#'
+#' @param pElig  An n x 1+w dataframe, with 1 row for every SID who was
+#'     survey-eligible for any of the waves of interest, and 1 col for
+#'     each wave, containing 1 if the SID was survey-eligible that wave,
+#'     and 0 if not (col 1 is SID).
+#' @return A list with n elements (one for each row of the inut DF). Each
+#'     element is a vector of pairs of arrival and departure times from
+#'     the network, as explained in the RSiena manual under 'method of
+#'     changing composition'.
+#' @details The input dataframe must be the object returned by
+#'     'getEligXWave', or the equivalent.
+#' @examples
+#' # Returns a list of composition change vectors for the SIDs
+#' # in waves 1, 3, and 4, and schools 3, 4, 5, 6, and 30.
+#' ccDF <- makeCCVec(getEligXWave(pWavVec = c(1,3,4),
+#'     pSchVec = c(3,4,5,6,30)))
 makeCCVec <- function(pElig){
   wv<-dim(pElig)[2] # cols (waves-1)
   nn<-dim(pElig)[1] # rows (nodes)
@@ -1168,18 +1283,100 @@ makeCCVec <- function(pElig){
   return(CCVec)
 }
 
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-# >> pValT <<
-#FFFFFFFFFFFF
-# Calculates t, 2-tailed p value, 95% CI
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-pValT <- function(rawDiff,sE){
-  #rawDiff<-  2.51
-  #sE<-  .87
-  tRat<-rawDiff/sE
-  #p-Value
-  pVal2t <- (1-pnorm(abs(tRat)))*2
-  #95% CI
-  ci95<-c(rawDiff-(1.96*sE),rawDiff+(1.96*sE))
-  c(tRat,pVal2t,ci95)
+#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# >> netvtxAttr <<
+# _____________________________________________________________________________
+#' Returns a dataframe DF with col.2 a suitable 'network' node attribute.
+#'
+#' Standalone function for creating pkg 'network' node (vertex) attribute.
+#'
+#' @param pAttrMasterDF A two-column dataframe with SID and the values of
+#'     some numerical variable 'x' as the columns. It should include all
+#'     SIDs for some school and wave range (e.g. as generated by 'getSWNodes')
+#'     for which there are data (if no data, attribute will be 'NA'). The SIDs
+#'     actually used are selected from the next parameter.
+#' @param pSIDVec An ordered vector of SIDs exactly matching the 'node set'
+#'     for the network of interest; e.g. if the network has n nodes, the length
+#'     of the returned dataframe will be n.
+#' @param pNetwork The 'network' object to assign the vertex attribute to. This
+#'     is not actually used to do the assignment, but rather, for some
+#'     consistency checking.
+#' @return A dataframe with two columns: SID (integer) and the associated values
+#'     of some variable (numerical).
+#' @examples
+#' # AL134DF is a dataframe as output by 'createOnset'.
+#' # Because this analysis is descriptive, this code creates a vertex
+#' # attribute for just one wave, and in the 2nd statement, assigns it as
+#' # a 'network' vertex attribute, naming it 'AlcOns'
+#' ALDF.w1 <- netVtxAttr(AL134DF[,c("SID","al.1")],ds.winsSID1,ds.winsOBF1.no)
+#' ds.winsOBF1.no %v% "AlcOns" <- ALDF.w1$al.1
+netVtxAttr <- function(pAttrMasterDF,pSIDVec,pNetwork) {
+  # Check a few things
+  if (length(pAttrMasterDF)!=2){
+    stop("Dataframe containing attributes does not have 2 cols.")
+  }
+  if (length(pNetwork$oel)!=length(pSIDVec)){
+    stop("Network vertex count not equal to # SIDs (pSIDVec)")
+  }
+  # make sure everything is in order, because vertex attributes are
+  # assigned based on some original order of the nodes, which in our
+  # case will correspond to SID order
+  pAttrMasterDF <- pAttrMasterDF[order(pAttrMasterDF$SID),]
+  pSIDVec <- sort(pSIDVec)
+  targDF <- merge(as.data.frame(pSIDVec),pAttrMasterDF,
+                  by.x = getNameAsString(pSIDVec), by.y = "SID", all.x = T)
+  names(targDF)[1] <- "SID"
+  return(targDF)
+}
+
+#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# >> zero30dSU <<
+# _____________________________________________________________________________
+# Used by: makeTVTbl
+# _____________________________________________________________________________
+#' Adjusts 30 day SU variables to zero if lifetime use is zero
+#'
+#' @param pDF A dataframe in the format returned by 'getNQTVCs', i.e. an
+#'     image of the database table 'SWave' that includes at least the
+#'     variables for lifetime and 30 day substance use included in the
+#'     Short Survey.
+#' @return A dataframe in the same format as the input DF, with 30 day
+#'     substance use variables recoded to 0 if no lifetime use of the
+#'     corresponding substance has been reported concurrently.
+#' @details Survey skip logic skips over 30 day SU questions if no lifetime
+#'     use of the substance is reported concurrently. This recode allows
+#'     the 30 day variables to be used in analyses under such circumstances,
+#'     instead of being missing.
+#' @note This function is a helper function for 'makeTVTbl', and is not
+#'     normally called directly by users
+zero30dSU <- function(pDF){
+  # The pDF has to be an object created by 'getNQVTCs' or equivalent
+  cct <- transform(pDF,
+                   Tob30Day = ifelse(TobLife==0,0,Tob30Day),
+                   ETob30Day = ifelse(ETobLife==0,0,ETob30Day),
+                   Chew30Day = ifelse(ChewLife==0,0,Chew30Day),
+                   Alc30Day = ifelse(AlcLife==0,0,Alc30Day),
+                   Bng30Day = ifelse(BngLife==0,0,Bng30Day),
+                   MJ30Day = ifelse(MJLife==0,0,MJ30Day)
+  )
+  return (cct)
+}
+
+# Utility Fns -----------------------------------------------------------------
+
+#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# >> getNameAsString <<
+# _____________________________________________________________________________
+#' Returns the name of a variable as a string.
+#'
+#' This function just removes the need to look up how to do this (fairly
+#'     common) operation, which I seem to have to do all the time, because
+#'     I can't remember the (little used) syntax.
+#' @param pVarName A variable name (no quotes or anything)
+#' @return The variable name as a string
+#' @examples
+#' # Returns c("myVariable")
+#' vStr <- getNameAsString(myVariable)
+getNameAsString <- function(pVarName){
+  deparse(substitute(pVarName))
 }

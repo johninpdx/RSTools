@@ -2,7 +2,7 @@
 % Please edit documentation in R/PInfDataFunctions.r
 \name{getEligXWave}
 \alias{getEligXWave}
-\title{Creates a dataframe with flags x wave for Short Survey eligibility}
+\title{Returns a dataframe with flags x wave for Short Survey eligibility}
 \usage{
 getEligXWave(pWavVec, pSchVec)
 }

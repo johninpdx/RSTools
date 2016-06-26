@@ -2,7 +2,7 @@
 % Please edit documentation in R/PInfDataFunctions.r
 \name{getSIDSet}
 \alias{getSIDSet}
-\title{Creates a vector of SIDs that are consistent with some Analysis Set}
+\title{Returns a vector of SIDs that are consistent with some Analysis Set}
 \usage{
 getSIDSet(pWavVec, pSchVec, pElig = 1, pDid = 1)
 }
@@ -34,7 +34,6 @@ Used by other functions in this package (e.g. getNetworkSet).
 }
 \examples{
 # Obtains the SID set for a network analysis:
-# Use the last element of 'netList', which is a vector of the SIDs in
-# the analysis
+SIDVec <- getSIDSet(c(1, 3, 4), c(3, 4, 5, 6, 30))
 }
 

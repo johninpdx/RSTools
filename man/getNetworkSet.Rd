@@ -2,7 +2,7 @@
 % Please edit documentation in R/PInfDataFunctions.r
 \name{getNetworkSet}
 \alias{getNetworkSet}
-\title{Creates a list of networks forming a longitudinal Analysis Set}
+\title{Returns a list of networks forming a longitudinal Analysis Set}
 \usage{
 getNetworkSet(pWavVec, pSchVec, pElig = 1, pDid = 1, pTyp = "BF",
   pOut = "SP", pS0 = "")
@@ -71,10 +71,12 @@ or by combining them into a SAOM network object using sienaNet (from
 # 2 or more surveys. Networks are defined as 'Best Friends'. Output
 # networks are in dgTSparse format, and the Wave 1 middle schools
 # have structural zeros between individuals in different schools.
-netList <- getNetworkSet(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30),
-    pElig = 2, pDid = 2, pTyp = "BF", pOut = "SP", pS0 = "S0")
+netList <- getNetworkSet(pWavVec = c(1, 3, 4),
+                         pSchVec = c(3, 4, 5, 6, 30),
+                         pElig = 2, pDid = 2, pTyp = "BF",
+                         pOut = "SP", pS0 = "S0")
 # Create SAOM longitudinal network object 'myNet'
-myNet <- sienaNet(netList[1:3],sparse=T)
+myNet <- sienaNet(netList[1:3], sparse=T)
 # Even easier way, using 'makeSAOMNet' wrapper function
 myNet2 <- makeSAOMNet(netList)
 }

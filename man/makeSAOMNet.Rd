@@ -2,7 +2,7 @@
 % Please edit documentation in R/PInfDataFunctions.r
 \name{makeSAOMNet}
 \alias{makeSAOMNet}
-\title{Creates a longitudinal 'sienaNet' object directly from 'getNetworkSet'}
+\title{Returns a longitudinal 'sienaNet' object directly from 'getNetworkSet'}
 \usage{
 makeSAOMNet(pNetInput)
 }
@@ -27,7 +27,7 @@ This function is a very thin wrapper for RSiena::sienaDependent (or
 \examples{
 # 'net' will be a 'sienaNet' network dependent variable:
   net <- makeSAOMNet(getNetworkSet(pWavVec = c(1,3,4),
-    pSchVec = c(3,4,5,6,30),
+    pSchVec = c(3, 4, 5, 6, 30),
     pElig = 2, pDid = 2, pTyp = "BF", pOut = "SP", pS0 = "S0"))
 }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/PInfDataFunctions.r
 \name{makeTVTbl}
 \alias{makeTVTbl}
-\title{Creates a data.table of a time varying behavior variable}
+\title{Returns a data.table of a time varying behavior variable}
 \usage{
 makeTVTbl(pCCTbl, pSIDs, pVar = "X", pCut = c(0), pMaxNA = 1)
 }
@@ -26,13 +26,13 @@ closed on the left, open on the right.}
 before the returned value for the particular subject-wave is set to NA}
 }
 \value{
-The table format is w+1 columns (w=#waves present in pCCTbl); first
-    column is an ordered set of SIDs, columns 2:(w+1) are the scored
-    (mean of items) value of the requested behaivor variable
-    for the w waves.
+The output table format is w+1 columns (w=#waves present in
+    pCCTbl); first column is an ordered set of SIDs, columns 2:(w+1)
+    are the scored (mean of items) value of the requested behaivor
+    variable for the w waves.
 }
 \description{
-Creates a data.table of a time varying behavior variable
+Returns a data.table of a time varying behavior variable
 }
 \details{
 May be used to create tables that can be easily converted to SAOM
@@ -69,8 +69,8 @@ netList <- getNetworkSet(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30),
 ccTbl <- getNQTVCs(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
 # Creates a data.table of antisocial behavior variables x subject & wave,
 # for the 3 waves & other criteria used above, grouped into 4 categories,
-# and with no more than 3 NAs out of the 6 items).
+# and with no more than 3 NAs out of the 6 items.
 abTbl <- makeTVTbl(ccTbl, netList[[4]], pVar = "AB",
-    pCut = c(0,.5,1,5,20), pMaxNA = 3)
+    pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
 }
 
