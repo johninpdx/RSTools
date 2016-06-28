@@ -61,10 +61,141 @@ that both dgTMatrix (sparse matrix) and network-class networks will be
 desired, and there should be a way to create them from the same underlying,
 known-consistent sets of data objects. 
 
+## Design
+
+The RSTools package roughly implements a so-called 3-Tier, client-server 
+architecture. Tier 1 is the "database" layer, and represents the repository
+for the raw data. RSTools currently includes Tier-1 functions designed to
+interact with the SQL Server database at ORI, called 'PInf1'. The associated
+project is called "Peer Influences", J. Light & J.C. Rusby, Co-Principal
+Investigators; it is a longitudinal study of social network dynamics
+and behavioral development, with network and behavioral observations 
+taken 3x/yr, from the end of 8th grade to the beginning of 11th grade. 
+Students were drawn from six different school districts; hence the study
+comprises six distinct networks. This database holds student response data
+in three tables: SMaster (one row for any student who ever did a survey, 
+containing non-time-varying data such as DOB, gender, and ethnicity), 
+SAffiliation (an edge list-formatted table of social network
+relationships), and SWave (a conventional longitudinal survey table with
+one row per student per wave of survey participation). 
+
+Tier 1 functions serve mainly to pull a super-set of data from the database
+from each of the tables SMaster, SAffiliation , and SWave, and create
+R data objects--typically dataframes or data.tables (as implemented by the
+package 'data.table'), or lists containing such objects--which can then 
+be used as is or further subset in the course of being processed into 
+objects that the 'RSiena' package will accept. It is important to recognize
+this tier will in most cases be project specific. Even if a project 
+were to use a database design similar to that of Peer Influences, column
+names would undoubtedly differ, making the SQL SELECT statements different
+in content, if still similar in basic structure.
+
+At this point, I want to insert an editorial comment. In my view, any social
+network study should use a relational database as its primary data
+repository. There are many reasons, but the primary one is the ability to 
+design the database to enforce *data integrity*, i.e., requiring that the data
+be internally consistent. This means, for example, that a nonexistent 
+participant cannot be added, or a participant cannot be assigned to the wrong
+network or a nonexistant network, etc. Ruinous amounts of time can be spent 
+trying to fix such errors after the fact. 
+
+In any case, the whole point of having a Tier 1 in 3-Tier client server
+systems is to allow as much re-use of code as possible in future projects.
+Tier 1 is supposed to "insulate" the higher layers from data that is 
+almost sure to vary across projects. Functions at that level will usually 
+need to be customized for particular projects, repository data formats, etc.,
+but if the software is well designed, little customization at higher levels
+should be necessary.
+
+In the RSTools package, I have made an effort to accomplish this fairly 
+ambitious goal, but I have surely failed to do so anything like fully. 
+Hopefully though, as I get more experience and input from fellow network
+researchers, and as a result perhaps a deeper understanding of what
+abstraction best fulfills these goals, the package will continue to move
+in that direction.
+
+These higher and "somewhat insulated" tiers are the middle tier, which for
+convenience we divided in two. The first is a "middle layer" that creates 
+objects useful for further data selection using R (i.e. without recourse 
+to Tier 1 functions again), and also objects that hold study data in 
+R-formatted objects, mainly dataframes or data.tables, that is essentially 
+"staged" to be processed into RSiena-compatible form. The second I 
+call Variable Creation and Scoring (VCS) functions, which work with the 
+middle layer objects to create data objects in the exact format required
+by RSiena model object creation functions.
+
+(As an aside, one might also consider the VCS functions to be yet a third
+tier, meaning the whole architecture is actually four tiers....)
+
+Finally, the third (fourth?) tier is usually called the "presentation tier",
+and is essentially the user interface (UI). In this application, the
+presentation tier is simply a script that puts these functions together
+to create a longitudinal network analysis, which for the moment means a
+SAOM. 
+
 The following rather bare-bones description provides an overview of RSTools,
 presented in terms of the expected analysis workflow.
 
-## Styles
+## Workflow
+
+Figure 1 shows a workflow supported by RSTools functions. There are four groups
+of operations to the workflow:
+>
+1. Create a **Network Analysis Set**
+2. Create data selection objects
+3. Create variable and composition change-compatible objects 
+4. Create RSiena modeling objects
+
+We will talk through each of these groups of operations. It will be helpful
+to refer to Figure 1 during this discussion.
+
+### Step 1: Create a Network Analysis Set
+
+I will use the term *Network Analysis Set* to refer to a set of observations
+that are internally consistent and can be sensibly modeled using SAOM. By
+"internally consistent", I mean 
+
+* The observations refer to the same individuals and time points (though
+  some of the observations could be missing for some variables)
+* The observations respect the same inclusion criteria. 
+  One can imagine a practically unlimited set of inclusion criteria, (e.g.
+  just males or females, just one particular source of observations such
+  as school or community, etc.). I have supported two nearly universal
+  criteria for longitudinal survey data (as utilized in SAOM), which 
+  however are not necessarily that simple to select on or keep consistent
+  across data types: groups comprising networks, and time periods (waves).
+  
+Thus in general, a Network Analysis Set refers explicitly to a set of
+basic observational units (typically individuals), and a set of waves. 
+Any variables allowed in SAOM (see the RSiena Manual for a complete
+description and discusion) are assumed to refer to the same individuals
+and waves, in a way that comprise a well-defined SAOM analysis.
+
+There is only one operation in this step; apply the function getNetworkSet.
+This function takes as input:
+
+1. pWavVec: A ordered vector of integers listing the waves of the survey to be
+   included in the Analysis Set.
+2. pSchVec: A vector (ordering is normal but optional) of school numbers to be
+   included in the Analysis Set. These schools are thought of as comprising a
+   single longitudinal network; if they do not, some method (not currently
+   implemented in RSTools) must be used to separate them, e.g. by designating
+   them as separte groups in a grouped analysis, or by using structural zeros
+   as edges between individuals in separate networks. The RSiena Manual 
+   (Ripley et al., 2016) discusses these options further.
+3. pElig: The minimum number of waves (out of those in pWavVec) that the study
+   participant must have been *survey eligible*. We will discuss how survey
+   eligibility is ascertained for the Peer Influences study below; this 
+   somewhat complex logic is wrapped by this function, however.
+4. pDid: The minimum number of waves (out of those in pWavVec) that ths study
+   participant must have *completed*. Survey completion in this case really 
+   means "partial completion", taken to be nearly anything but a completely
+   blank survey. Specifically, we chose to define it as having answered one or
+   more of the "lifetime substance use" questions included in the survey (for
+   tobacco, alcohol, marijuana, etc.). The middle layer/scoring function 
+   allNQNotNA defines this criterion; of course it can easily be replaced by
+   alternatives. 
+
 
 The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
 
