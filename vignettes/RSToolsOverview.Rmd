@@ -37,7 +37,17 @@ performed on them, and the more complicated the relevant scripts become,
 the greater the chance of error and confusion.
 
 The 'RSTools' package represents an attempt to begin to address some of these
-issues. The package implements a somewhat but not completely project-specific
+issues. It is a result of my experience in setting up social network analyses
+over the last 13 years. In earlier times and with simpler studies (e.g. just
+survey data, typically longitudinal) I was able to get by with an ad hoc
+approach. I would maintain a core set of scoring code (for multi-item
+variables and such), but tended to build subfiles in a very analysis-specific
+way, using file names and folders as a way of separating different
+sub-projects. This worked pretty well most of the time, but invariably
+led to code duplication due to lack of modularity, and a kind of rolling
+complexification that always seemed to occur as a project moved forward.
+
+The package implements a somewhat but not completely project-specific
 set of functions designed to (a) pull data from a raw (but clean) data
 repository, (b) create useful intermediate objects that can be kept in a
 workspace and used for (c) creating data objects that can be used by 
@@ -45,10 +55,10 @@ the social network analysis packages 'network' and 'RSiena'. It is, I think,
 still a pretty primitive attempt at generality! However, at least for the
 particular project it has been implemented for (ORI's "Peer Influences"
 project, J. Light & J.C. Rusby, Co-principal Investigators), it implies a
-specific, straightforward, clean, and highly reproduceable workflow that
-may generalize to many other social network studies. At worst, it will have
-been worth the effort required by making this one study's data management
-and analysis more tractable that it would have been otherwise.
+specific, straightforward, clean, and highly reproduceable workflow. It
+remains to be seen how well the package translates to other projects, but
+at least, it may provide a kind of roadmap for how a network study can be
+set up for easier analysis. 
 
 The name 'RSTools' was chosen because the primary analyses anticipated are
 Snijders' Stochastic Actor Oriented Models (SAOMs), as implemented by the
@@ -107,20 +117,19 @@ need to be customized for particular projects, repository data formats, etc.,
 but if the software is well designed, little customization at higher levels
 should be necessary.
 
-In the RSTools package, I have made an effort to accomplish this fairly 
-ambitious goal, but I have surely failed to do so anything like fully. 
-Hopefully though, as I get more experience and input from fellow network
-researchers, and as a result perhaps a deeper understanding of what
-abstraction best fulfills these goals, the package will continue to move
-in that direction.
+In the RSTools package, I have tried to make some progress towards this goal,
+but there is still a lot of quite project-specific code in the
+middle tier functions. Hopefully though, as I get more experience and input 
+from fellow network researchers, and as a result perhaps a deeper 
+understanding of what abstraction best fulfills these goals, the package 
+will continue to generalize.
 
-These higher and "somewhat insulated" tiers are the middle tier, which for
-convenience we divided in two. The first is a "middle layer" that creates 
+The middle tier is divided in two. A "middle layer" creates 
 objects useful for further data selection using R (i.e. without recourse 
 to Tier 1 functions again), and also objects that hold study data in 
 R-formatted objects, mainly dataframes or data.tables, that is essentially 
-"staged" to be processed into RSiena-compatible form. The second I 
-call Variable Creation and Scoring (VCS) functions, which work with the 
+"staged" to be processed into RSiena-compatible form. Then also the 
+Variable Creation and Scoring (VCS) functions work with the 
 middle layer objects to create data objects in the exact format required
 by RSiena model object creation functions.
 
@@ -171,7 +180,7 @@ Any variables allowed in SAOM (see the RSiena Manual for a complete
 description and discusion) are assumed to refer to the same individuals
 and waves, in a way that comprise a well-defined SAOM analysis.
 
-There is only one operation in this step; apply the function getNetworkSet.
+There is only one operation in this step; apply the function **getNetworkSet**.
 This function takes as input:
 
 1. pWavVec: A ordered vector of integers listing the waves of the survey to be
@@ -195,6 +204,180 @@ This function takes as input:
    tobacco, alcohol, marijuana, etc.). The middle layer/scoring function 
    allNQNotNA defines this criterion; of course it can easily be replaced by
    alternatives. 
+5. pTyp: Defines the network relationship criterion for the network. The
+   quite project-specific options are BF (best friend) and FT (someone you
+   spend free time with).
+6. pOut: Type of network output. There are two choices: SP (class dgTSparse),
+   which can be converted directly into an RSiena dependent network, and
+   NT (class 'network', from Carter Butts' package of the same name). The
+   latter is convenient for descriptive analysis using the packages network
+   and sna.
+7. pS0: If "S0", and if the schools chosen include middle schools, and if
+   wave 1 is one of the selected waves, this option will create structural 
+   zero edges between all dyads not in the same middle school for wave 1.
+   
+Output from this function is a list of length W+1, where W is the number of
+waves requested. Each list element contains the network for the corresponding
+wave requested in pWavVec; the w+1st element is an ordered vector of Study IDs
+(SIDs) for every individual included in the Analysis Set for any requested
+wave. In Figure 1, this list is called 'netSetxx', where xx = SP or NT 
+depending on the network format.
+
+In this draft of the package vignette, I will not further consider descriptive
+analysis with 'network' class networks; this will be rectified in later 
+versions. Instead, I will focus on workflow for SAOM.  
+
+
+### Step 2: Create Data Selection Objects
+
+In this step, two dataframes are created. 'eligXWave' has a column of ordered
+SIDs, followed by one column for each wave in the Analysis Set of interest.
+These columns contain indicator variables (0/1) which are 1 if the SID
+was eligible to do the survey in that wave, whether he/she actually 
+completed a survey or not. This information is of course needed to calculate
+response rates, but it is also important in network studies because even
+if an individual did not complete a survey in wave w, the fact that they
+were eligible probably means they could have been selected by others
+in the network part of the questionnaire. Including individuals who are only
+selected by others may be a good idea in some cases, e.g. a network-only
+analysis where the relationship in question is symmetric. 
+
+Determining eligibility is not always simple. In the
+Peer Influences project, participants might become eligible to be surveyed 
+in the middle of a particular wave period, or be eligible for a while and
+then transfer to another school (sometimes a school also participating in 
+the project), and so on. In other words--unlike simpler projects--survey
+eligibility is both time (actually, day) and school (network)-specific. 
+The database keeps a date-stamped log of survey eligibility for
+each student at each school (whose names and district IDs we obtained from
+the schools a few weeks before each scheduled survey period).
+Surveys are also date-stamped. Thus we consider
+a student to be survey-eligible for a given school and wave if that student
+was eligible on any day during which we were conducting surveys in that
+school. These overlaps could all be inferred programmatically, and we
+wrote a stored procedure (SQL script) to return the necessary eligibility
+information. This 'sproc' is called by **getEligXWave**, and used to create
+'eligXWave', thus encapsulating a great deal of complicated logic. The latter
+goal is a major factor in deciding whether it is worthwhile to write a
+general function to solve some problem, instead of simply writing a few lines
+of code in the master analysis script.
+
+A related task is summarizing who actually completed a survey each wave. Some
+eligible students in our project did not complete surveys, either because 
+they were absent from school on the days surveys were being conducted (in
+school computer labs) and could not be rounded up subsequently, or because
+they chose not to participate for one reason or another. This information is
+summarized in a dataframe 'diditXWave', returned by the function 
+**getDiditXWave**. This function makes use of a helper function, 
+**allNQNotNA**, which checks to see not only whether a survey record was 
+created for that individual and wave, but also whether any of a small set
+of questions were actually answered (as it turns out, the lifetime substance
+use questions). The resulting dataframe is structured like 'eligXWave', with 
+the first column the SID, and then W additional columns containing 1's if the
+individual with that SID 'completed' that wave, and 0 otherwise (including 
+possibly because he or she was ineligible).
+
+This step also creates two related vectors of SIDs: 'netSetSID.elig', 
+containing all the individuals survey-eligible on any wave in some
+Analysis Set, and 'netSetSID.didx', containing individuals satisfying
+a particular set of survey completion criteria. The former can be generated
+either by making an alias or copy of the last list element of 'netSetxx', 
+or, less optimally, by running **getEligNodes** directly (the latter is used 
+within **getNetworkSet**). The latter is usually a simple row selection on
+'diditXWave', so there is no special function to create it.
+
+### Step 3: Variable and Composition Change Objects
+
+In this step, objects needed in a SAOM are created in a way that simplifies
+assuring their compatability with an Analysis Set, while also putting
+them in formats that can be directly accepted by RSiena-specific object
+creation functions. The objects supported by RSTools so far are (a) composition
+change lists, (b) fixed covariates, and (c) time varying covariates--dependent
+network variables were already dealt with in Step 1. The order in which these
+objects are created doesn't matter, but we will follow the order shown in
+Figure 1 for the sake of clarity. 
+
+Task [i] passes the previously created object 'netSetSID.didx' to the 
+function **makeCCVec**, which then returns a list of vectors that can
+be passed directly to **RSiena::sienaCompositionChange**. The structure
+of the returned list is described in the RSiena Manual.
+
+Task [ii] is to create fixed covariate-compatable objects. Aside from pulling
+this data from the database into a dataframe using **getFixedCovs** (Step 
+[iia]) there are no special functions available for this process, because it 
+is so straightforward. Once the fixed covariate dataframe has been created, one
+simply extracts the column of interest (say, "gender"), and selects only the
+rows with SIDs in the analysis set, e.g. from 'netSetSID.didx', or wherever
+one has put the Analysis Set SIDs generted in Step 1. This process is depicted
+in step [iib]. 
+
+Task [iii] creates dataframes that are ready to be converted into RSiena 
+time varying covariates, or dependent behavior variables (we will refer to
+both as time varying covariates, or TVCs, for brevity). First (step
+[iiia]) a particular TVC is selected and extracted by the function 
+**getNQTVCs**. This function returns a dataframe 'TVCov' that is an R image of
+the 'SWave' database table, with all time-varying individual level variables
+across the columns, and one row for each SID and wave in the school and
+wave sets requested. 
+
+Step [iiib] again has no special functional support; 'TVCov' rows are selected
+using the Analysis Set SID vector 'netSetSID.didx' or equivalent, creating an
+analysis set-compatible dataframe, 'TVCov.didx'. Then step [iiic] invokes
+**makeTVTbl**, using 'TVCov.didx' as input. One of the input parameters 
+allows the user to select a particular TVC with a two-character string. These
+codes are interpreted by an internal function, **getTVCCols**, that
+translates the requested variable into a specific database column or, if 
+a multi-item scale, columns (these are now accessed from 'TVCov.didx', of
+course). The user may also select a maximum number of these items that can be
+NA before the scale is scored NA for that individual and wave; if not, the
+average item rating is calculated as the scale score (this approach could
+be extended to more complicated and scale-specific scoring algorithms if
+necessary). Finally, the scale (or item, if there is just one) may be recoded 
+with cut points supplied as a parameter vector by the user. (Often it is best
+to make one scoring run with no cut point recoding (the default, if the cut
+point parameter vector is not specified), and then look at the distribution to
+decide which cut points would be most meaningful. Recall that RSiena variables 
+should normally be no more than about 4 or 5 ordered categories). The
+function returns a dataframe with W+1 columns: SID, and then the scored value
+of the selected TVC for each requested wave. This format can be input 
+directly to the RSiena functions creating either behavior dependent or time-
+varying-covariate variables; one need only select the last W columns for 
+input to these functions, e.g. 'xxTBL[,c(2:(W+1)]', where 'xx' is replaced by
+two (or more, if you like) letters describing the covariate. Thus in Figure 1
+we show 'ALTbl' as an example, where each column gives user response to the
+question, "How many times have you had 1 drink of alcohol or more in your
+entire life, up to now?"
+
+There is also a special scoring function [step [iiid] for creating up-only, 
+time-to-event variables. In this study, these are applied only to substance 
+use, so the function, **createOnset**, takes one of the 'lifetime' substance 
+use response tables (e.g. ALTbl, per above) as input, and creates a variable
+that is 0 across columns 2:(W+1) until the respondent first indicates any
+(or some threshold of) lifetime use of that substance. From that wave on, 
+the variable has the value 1. 
+
+### Step 4: Create RSiena Objects
+
+RSiena objects used in a SAOM may now be created by simply passing the objects
+from previous steps (1 and 3, specifically) to the relevant RSiena functions.
+
+A composition change object is obtained with 
+
+  > cc <- sienaCompositionChange(ccVec).
+  
+A fixed (constant) covariate is obtained with, e.g., 
+
+  > sex <- coCovar(Gndr).
+
+A behavior dependent variable is created via 
+
+  > ao <- sienaNet(as.matrix(AOTbl[,c(2:(W+1))]),type = "behavior").
+  
+Finally, anetwork dependent variable is created with a special function that
+accepts the entire output of 'getNetworkSet' as its only input:
+
+  > net <- makeSAOMNet(netSetSP)
+  
 
 
 The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
