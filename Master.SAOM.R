@@ -39,8 +39,12 @@ netSetSPS0 <- getNetworkSet(pWavVec = c(1,3,4,5),
 # A set of 'network' class networks (these are much larger than the dgTSparse
 #   matrix objects, by a factor of just over 50). These could be created and
 #   used for descriptive purposes.
-netSetNT <- getNetworkSet(pWavVec = c(1,3,4,5), pSchVec = c(3,4,5,6,30),
-                           pElig = 1, pDid = 1, pTyp = "BF", pOut = "NT")
+netSetNT <- getNetworkSet(pWavVec = c(1,3,4,5),
+                          pSchVec = c(3,4,5,6,30),
+                          pElig = 1,
+                          pDid = 1,
+                          pTyp = "BF",
+                          pOut = "NT")
 
 # STEP 2: create some useful ancillary objects================================
 
@@ -50,9 +54,6 @@ netSetNT <- getNetworkSet(pWavVec = c(1,3,4,5), pSchVec = c(3,4,5,6,30),
 #   be a subset of these (because this set ignores whether the participant
 #   actually did any surveys)
 netSetSID.elig <- getEligNodes(pWavVec = c(1,3,4,5), pSchVec = c(3,4,5,6,30))
-# Here are the SIDs finally included in the NetSet (accounts for
-# survey completion requirements too)
-netSetSID.did1 <- netSetSP[[5]]
 
 # An <ever elig> x <nWaves> DF of survey eligibility (0/1) x wave
 eligXWave  <- getEligXWave(c(1,3,4,5), c(3,4,5,6,30))
@@ -60,6 +61,12 @@ eligXWave  <- getEligXWave(c(1,3,4,5), c(3,4,5,6,30))
 # an <ever elig> x <nWaves> DF of suvery 'completion' (0/1) x wave
 # ('completion' as defined in function 'allNQNotNA')
 diditXWave <- getDiditXWave(pWavVec = c(1,3,4,5), pSchVec = c(3,4,5,6,30))
+
+# Here are the SIDs finally included in the NetSet (accounts for
+# survey completion requirements too). (Could have been obtained by running
+#    'diditXWave' and selecting rows on the basis of which waves were
+#    completed, or how many, etc.)
+netSetSID.did1 <- netSetSP[[5]]
 
 # STEP 3: Vars & CompChg ======================================================
 
@@ -69,7 +76,8 @@ diditXWave <- getDiditXWave(pWavVec = c(1,3,4,5), pSchVec = c(3,4,5,6,30))
 # You might use a more stringent criterion for inclusionxxxx in an analysis, but
 # (obviously) never a less stringent one!
 # _______________________________
-ccVec     <- makeCCVec(netSetSID.did1)  # For w1,3,4,5 -- n=412
+# For w1,3,4,5 -- n=412 (must select for SIDs in the Analysis Set)
+ccVec     <- makeCCVec(eligXWave[eligXWave$SID %in% netSetSID.did1,])
 
 # _____________________________
 #Create a crosswalk of SIDs and RowIDs, sorted by SID (so RowIDs apply
@@ -78,13 +86,15 @@ ccVec     <- makeCCVec(netSetSID.did1)  # For w1,3,4,5 -- n=412
 # identify network nodes; however, selecting and labeling (in output)
 # require original SIDs. This dataframe can be used to translate.
 # _____________________________
-sidRowID<-data.frame(did1,seq(1,length(did1))) #n=412
+sidRowID <- data.frame(netSetSID.did1,seq(1,length(netSetSID.did1))) #n=412
 names(sidRowID)<-c("SID","RID")
 
 # Fixed Covariates   ----
-FxCovBSD<-getFixedCovs(c(3,4,5,6,30))
+FxCovBSD <- getFixedCovs(c(3,4,5,6,30))
 # ________________________________
-FxCovBSD.did1 <- FxCovBSD[FxCovBSD$SID %in% did1,]
+FxCovBSD.did1 <- FxCovBSD[FxCovBSD$SID %in% netSetSID.did1,]
+
+#   S T A R T   H E R E
 
 # * Gender (Fxd Cov) ----
 Gndr <- FxCovBSD.did1$Gender    #1=M, 0=F
@@ -149,12 +159,12 @@ AOTbl <- createOnset(ALTbl)
 
 # Fixed covs
 # __________
-sex <- TVCovar(Gndr) #0 = F, 1 = M
+sex <- coCovar(Gndr) #0 = F, 1 = M
 
 # * Dependent Behviors ----
 # ___________
 # Alc Onset
-al1345 <- sienaNet(as.matrix(AOTbl[,c(2:5)]),type = "behavior")
+al1345v <- sienaNet(as.matrix(AOTbl[,c(2:5)]),type = "behavior")
 
 # * Networks ----
 # ___________
@@ -254,7 +264,6 @@ fix(modEff)
 # _____________________________________________________________________________
 # * Run model -----
 # _____________________________________________________________________________
-dataOb <- dataObAC13
 modl <- acMod
 prevResult <- alResult
 #First time

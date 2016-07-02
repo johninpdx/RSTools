@@ -8,7 +8,7 @@ makeCCVec(pElig)
 }
 \arguments{
 \item{pElig}{An n x 1+w dataframe, with 1 row for every SID who was
-survey-eligible for any of the waves of interest, and 1 col for
+*survey-eligible* for any of the waves of interest, and 1 col for
 each wave, containing 1 if the SID was survey-eligible that wave,
 and 0 if not (col 1 is SID).}
 }

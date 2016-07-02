@@ -24,6 +24,10 @@ Returns a vector of SIDs who were Short Survey eligible on any input wave
 Used by other functions in this package (e.g. getNetworkSet,
     makeTVTbl, )
 }
+\note{
+This function just repeatedly calls 'getSWNodes' for each requested
+    school & wave combination
+}
 \examples{
 # gets vector of SIDs for waves 1, 3, 4, and 5, schools 3-6 and 30 (one
 # school district)

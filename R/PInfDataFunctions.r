@@ -30,7 +30,7 @@
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> getDiditXWave <<
 # _____________________________________________________________________________
-# Uses: getNQTVCs, AllNQNotNA, pkg 'RODBC' (indirect)
+# Uses: getNQTVCs, AllNQNotNA, pkg 'RODBC' (indirect), pkg 'data.table'
 # _____________________________________________________________________________
 #' Returns dataframe with flags indicating survey completion
 #'
@@ -52,6 +52,8 @@
 #' # survey at least once, and completed at least 1 survey in these waves.
 #' sidVec <- getSIDSet(c(1, 3, 4, 5), c(3, 4, 5, 6, 30), 1, 1)
 getDiditXWave <- function(pWavVec,pSchVec){
+  cat("Obtaining survey completion info...", "\n")
+  require(data.table)
   #Get a node list of all eligible, so the output DF records participation
   #  for all eligible at any wave
   allNodes <- getEligNodes(pWavVec,pSchVec)
@@ -59,13 +61,15 @@ getDiditXWave <- function(pWavVec,pSchVec){
   outDF <- data.frame(allNodes)
   names(outDF)[1] <- "SID"
   # Add cols to output DF for each wave, 1 if participant 'did it', else 0
-  tvc <- allNQQNotNA(getNQTVCs(pWavVec,pSchVec))
+  tvc <- allNQQNotNA(getNQTVCs(pWavVec,pSchVec)) # WATCH OUT, this is a
+                                                 # data.table !!
   for (i in 1:length(pWavVec)){
     vWvN <- paste("wv",toString(pWavVec[i]),sep="") # new col name
-    didItNodesi <- sort(unique(tvc[tvc$DidIt==1 & tvc$WID==pWavVec[i],"SID"]))
-    outDF[,i+1] <- ifelse(match(allNodes,didItNodesi,nomatch=0) ==0,0,1)
+    diditNodesi <- unique(tvc[DidIt == 1 & WID == pWavVec[i],SID])
+    outDF[,i+1] <- ifelse(match(allNodes,diditNodesi,nomatch=0) ==0,0,1)
     names(outDF)[i+1] <- vWvN
   }
+  cat("Done", "\n")
   return(outDF[order(outDF$SID),])
 }
 
@@ -87,6 +91,8 @@ getDiditXWave <- function(pWavVec,pSchVec){
 #' @return A (#eligible SIDs)-length numerical vector of SIDs.
 #' @details Used by other functions in this package (e.g. getNetworkSet,
 #'     makeTVTbl, )
+#' @note This function just repeatedly calls 'getSWNodes' for each requested
+#'     school & wave combination
 #' @examples
 #' # gets vector of SIDs for waves 1, 3, 4, and 5, schools 3-6 and 30 (one
 #' # school district)
@@ -98,7 +104,8 @@ getEligNodes <- function(pWavVec, pSchVec){
   for (i in seq_along(pWavVec)){
     for (j in seq_along(pSchVec)){
       # This call gets the SIDs of kids in school j, survey eligible in wave i
-      sidHolder[[((i-1)*length(pSchVec))+j]] <- getSWNodes(pWav = pWavVec[i], pSch = pSchVec[j])
+      sidHolder[[((i-1)*length(pSchVec))+j]] <- getSWNodes(pWav = pWavVec[i],
+                                                           pSch = pSchVec[j])
     }
   }
   # Combines unique SIDs into a sorted vector
@@ -134,31 +141,42 @@ getEligNodes <- function(pWavVec, pSchVec){
 #' EligXWave <- getEligXWave(c(1,3,4,5), c(3,4,5,6,30))
 getEligXWave <- function(pWavVec,pSchVec){
   # Get the eligible node list for each wave
+  cat("Obtaining survey eligibility info...", "\n")
   nodeList <- vector("list",length(pWavVec))
   allNodes <- numeric()
   for (i in 1:length(pWavVec)){
     wavNodes <- numeric()
     for (j in 1:length(pSchVec)){
+      # execute only if school and wave combination were observed
+      if (schWvExists(pWavVec[i],pSchVec[j])){
+      cat("Pulling eligible SIDs from database W",
+          pWavVec[i],",Sch",pSchVec[j], "\n")
+      # We can't use 'getEligNodes', because we need the wave-
+      # level eligibility to construct the output DF.
       nodesij <- getSWNodes(pWavVec[i],pSchVec[j],1,0)
       wavNodes <- append(wavNodes, nodesij, after=length(wavNodes))
       allNodes <- append(allNodes, nodesij, after=length(allNodes))
+      }
+      # ...otherwise go on to the next i,j pair.
     }
     # Each list element is the eligible nodes for that wave
     nodeList[[i]]<-wavNodes
   }
 
   # Construct Output Dataframe
-  allNodesUnique <- getEligNodes(pWavVec,pSchVec) # All Elig SIDs, all waves
+  allNodesUnique <- unique(allNodes) # All Elig SIDs, all waves
   outDF <- data.frame(allNodesUnique)
   names(outDF)[1] <- "SID"
 
   # Will hold output
-  vWvNames <-character(length(pWavVec))
+  # vWvNames <-character(length(pWavVec))
+  cat("Saving elig info...", "\n")
   for (i in 1:length(pWavVec)){
     vWvN <- paste("wv",toString(pWavVec[i]),sep="") # new col name
-    outDF[,i+1] <- ifelse(match(allNodesUnique,nodeList[[i]],nomatch=0) ==0,0,1)
+    outDF[,i+1] <- ifelse(match(allNodesUnique,nodeList[[i]],nomatch=0) == 0,0,1)
     names(outDF)[i+1] <- vWvN
   }
+  cat("Done", "\n")
   return(outDF[order(outDF$SID),])
 }
 
@@ -569,7 +587,7 @@ makeSAOMNet <- function(pNetInput){
 #' # and with no more than 3 NAs out of the 6 items.
 #' abTbl <- makeTVTbl(ccTbl, netList[[4]], pVar = "AB",
 #'     pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
-makeTVTbl <- function(pCCTbl, pSIDs, pVar="X", pCut = c(0), pMaxNA = 1){
+makeTVTbl <- function(pTVTbl, pSIDs, pVar="X", pCut = c(0), pMaxNA = 1){
   require(dplyr, data.table)
   if (pVar == "X"){
     cat("Warning: No var name supplied; name defaults to X", "\n")
@@ -577,21 +595,21 @@ makeTVTbl <- function(pCCTbl, pSIDs, pVar="X", pCut = c(0), pMaxNA = 1){
   # Create a name for the binned (final form, scaled) variable:
   binVar <- paste(pVar,"B", sep = "") # Name of binned variable (e.g."ABB", ..)
   # Select only the SIDs from the input data.table to be used in the analysis
-  ccDT <- data.table(filter(pCCTbl,SID %in% pSIDs))
-  setkey(ccDT, SID, WID)
+  tvDT <- data.table(filter(pTVTbl,SID %in% pSIDs))
+  setkey(tvDT, SID, WID)
 
   # Get the vector (length >= 2) of variables implied by pVar
   items4TVC <- getTVCCols(pVar)
 
   # Calculate rowmeans
-  ccDT[[pVar]] <- rowMeans(ccDT[, items4TVC, with = F],na.rm = T)
+  tvDT[[pVar]] <- rowMeans(tvDT[, items4TVC, with = F],na.rm = T)
   # find rows for which the pVar needs to be set to NA. Only looks at the sub-
   #  dataframe with col names in 'items4TVCs'. naSums contains #NAs per row.
-  naSums <- apply(ccDT[, items4TVC, with = F], 1, function(x) sum(is.na(x)))
-  ccDT[[pVar]][which(naSums > pMaxNA)] <- NA
+  naSums <- apply(tvDT[, items4TVC, with = F], 1, function(x) sum(is.na(x)))
+  tvDT[[pVar]][which(naSums > pMaxNA)] <- NA
 
   # Bin 'pVar' according to the cut points in 'pCut'; place in 'binVar'
-  ccDT[[binVar]] <- as.numeric(cut(ccDT[[pVar]], pCut, right=F,
+  tvDT[[binVar]] <- as.numeric(cut(tvDT[[pVar]], pCut, right=F,
                                      include.highest = T,
                                      labels = c(1:(length(pCut)-1))))
 
@@ -600,14 +618,44 @@ makeTVTbl <- function(pCCTbl, pSIDs, pVar="X", pCut = c(0), pMaxNA = 1){
   #  length(pWavVec)+1 DT. The last length(pWavVec) set of cols is then
   #  input as a matrix to 'sienaDependent' or 'varCovar'.
   # The whole DT is returned.
-  ccDTLong <- data.table(ccDT$SID)
-  ccDTLong$WID <- ccDT$WID
-  ccDTLong[[pVar]] <- ccDT[[binVar]] # output name will be the original
-  names(ccDTLong) <- c("SID", "WID", pVar)
-    ccDTLong[[pVar]] <- ccDTLong[[pVar]] - 1 #makes scales 0-based
-  ccDTWide <- reshape(ccDTLong,timevar = "WID", idvar = "SID",
+  tvDTLong <- data.table(tvDT$SID)
+  tvDTLong$WID <- tvDT$WID
+  tvDTLong[[pVar]] <- tvDT[[binVar]] # output name will be the original
+  names(tvDTLong) <- c("SID", "WID", pVar)
+    tvDTLong[[pVar]] <- tvDTLong[[pVar]] - 1 #makes scales 0-based
+  tvDTWide <- reshape(tvDTLong,timevar = "WID", idvar = "SID",
                       direction = "wide")
-  return(ccDTWide)
+  return(tvDTWide)
+}
+
+#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# >> schWvExists <<
+# _____________________________________________________________________________
+#' Returns logical TRUE if requested wave includes requested school
+#'
+#' This information is inherent in the study design; middle schools are only
+#'     observed in Wave 1 (and high schools are not), whereas high schools
+#'     are only observed in waves 3:5, 7:9, and 11.
+#'
+#' @param pWav The wave number of interest. Cannot be 2, 6, or 10.
+#' @param pSch The school ID number of interest.
+#' @return Logical variable; TRUE if the requested school and wave has any
+#'     observations, otherwise FALSE.
+#' @note: Used internally only
+#'
+schWvExists <- function(pWav,pSch){
+  midSchools <- c(1:9,101,102)
+  hiSchools <- c(10,20,30,70,80,110,120)
+  # Initialize return value
+  if (!(pWav %in% c(1,3:5,7:9,11))){
+    stop("Error: Illegal wave requested. Must be 1, 3-5, 7-9, or 11.")
+  }
+  if ((pWav == 1 & pSch %in% midSchools) |
+      (pWav > 2 & pSch %in% hiSchools)){
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
 }
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -902,15 +950,12 @@ getSWNodes <- function(pWav, pSch, pNQW = 1, pFQW = 0){
   # The sproc called here creates a DB table of survey-eligible kids for this
   # cohort and wave. Then the correct school is selected from that table.
   # ____________________________________________________
-    cat("Begin pulling eligible SIDs from database", "\n")
   tblOfNodesQuery <- paste("exec PInf1.dbo.StudentSIDInWave @CohortID = ",pCoh,",@PeriodID = ",
                            pPer,",@Wave = ",
                            pWav,",@NQWanted = ",pNQW,",@FQWanted = ",pFQW)
   eligNums <- sqlQuery(conn,tblOfNodesQuery)
   nodeQuery <- paste("SELECT SID,SchID From PInf1.dbo.NQEligTbl ")
   nodes_temp <- data.table(sqlQuery(conn,nodeQuery), key = "SID")
-  #
-    cat("Done pulling eligible SIDs from database", "\n")
   # _____________________________________________________
   # If the query returned no records, return a length 0 vector
   if (dim(nodes_temp)[1] == 0){
@@ -921,7 +966,6 @@ getSWNodes <- function(pWav, pSch, pNQW = 1, pFQW = 0){
   # shows a different SchID in SWave then pSch, mark that node for
   # removal.
   # ____________________________________________________
-    cat ("Begin test of eligibility vs. actual data in SWave", "\n")
   sWaveQuery <- paste("SELECT SID, SchID From PInf1.dbo.SWave ",
                       " WHERE SchID =",pSch, " AND WID=",pWav)
   sWaveSIDSch <- data.table(sqlQuery(conn,sWaveQuery),key = "SID")
@@ -1236,7 +1280,7 @@ getTVCCols <- function(pVar){
 #'     'sienaCompositionChange'.
 #'
 #' @param pElig  An n x 1+w dataframe, with 1 row for every SID who was
-#'     survey-eligible for any of the waves of interest, and 1 col for
+#'     *survey-eligible* for any of the waves of interest, and 1 col for
 #'     each wave, containing 1 if the SID was survey-eligible that wave,
 #'     and 0 if not (col 1 is SID).
 #' @return A list with n elements (one for each row of the inut DF). Each

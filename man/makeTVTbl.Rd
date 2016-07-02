@@ -4,13 +4,9 @@
 \alias{makeTVTbl}
 \title{Returns a data.table of a time varying behavior variable}
 \usage{
-makeTVTbl(pCCTbl, pSIDs, pVar = "X", pCut = c(0), pMaxNA = 1)
+makeTVTbl(pTVTbl, pSIDs, pVar = "X", pCut = c(0), pMaxNA = 1)
 }
 \arguments{
-\item{pCCTbl}{A dataframe or data.table of all the time-varying covariates
-in long-form (1 row per subject per wave) produced by the function
-   'getNQTVCs'. It is an image of the database table PInf1.dbo.SWave.}
-
 \item{pSIDs}{A numeric vector of SIDs of the individuals in this Analysis
 Set (i.e. for example, created by 'getNetworkSet'). Ensures the table
 created is consistent with such a set.}
@@ -24,6 +20,10 @@ closed on the left, open on the right.}
 
 \item{pMaxNA}{The maximum number of NAs among the variable's items
 before the returned value for the particular subject-wave is set to NA}
+
+\item{pCCTbl}{A dataframe or data.table of all the time-varying covariates
+in long-form (1 row per subject per wave) produced by the function
+   'getNQTVCs'. It is an image of the database table PInf1.dbo.SWave.}
 }
 \value{
 The output table format is w+1 columns (w=#waves present in
