@@ -31,6 +31,9 @@ Chooser was asked for more information on an individual (if any)
     missing for any alters not so designated, or if Chooser did not
     make this designation at all.
 }
+\note{
+Internal function, NOT EXPORTED
+}
 \examples{
 # Gets edgelist (with addtional info on some alters) for individuals in
 # waves 1, 3, and 4, schools 3:6 and 30 (one school district).

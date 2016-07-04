@@ -26,5 +26,6 @@ This is a 'helper' function which, along with s0Make, adds rows of
 \note{
 This function should not normally be used stand-alone. To see how it
     is used in context, consult the source code for 'getNetworkSet'.
+    NOT EXPORTED
 }
 

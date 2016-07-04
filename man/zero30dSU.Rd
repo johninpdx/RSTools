@@ -4,16 +4,16 @@
 \alias{zero30dSU}
 \title{Adjusts 30 day SU variables to zero if lifetime use is zero}
 \usage{
-zero30dSU(pDF)
+zero30dSU(pDT)
 }
 \arguments{
-\item{pDF}{A dataframe in the format returned by 'getNQTVCs', i.e. an
+\item{pDF}{A data.table in the format returned by 'getNQTVCs', i.e. an
 image of the database table 'SWave' that includes at least the
 variables for lifetime and 30 day substance use included in the
 Short Survey.}
 }
 \value{
-A dataframe in the same format as the input DF, with 30 day
+A data.table in the same format as the input DF, with 30 day
     substance use variables recoded to 0 if no lifetime use of the
     corresponding substance has been reported concurrently.
 }
@@ -27,7 +27,7 @@ Survey skip logic skips over 30 day SU questions if no lifetime
     instead of being missing.
 }
 \note{
-This function is a helper function for 'makeTVTbl', and is not
-    normally called directly by users
+This function is a helper function for 'makeTVTbl'.
+    NOT EXPORTED
 }
 

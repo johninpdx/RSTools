@@ -29,6 +29,9 @@ Adding structural zeros is an option of 'getNetworkSet', which
     only meaningful for middle schools from the same school district at
     Wave 1.
 }
+\note{
+Internal Function, NOT EXPORTED
+}
 \examples{
 # Gets dataframe including SIDs for the wave vector 'mSchVec' and the
 # two-column dataframe 'sidRowID'.

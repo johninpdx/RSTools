@@ -27,6 +27,9 @@ An integer vector of SIDs
 Output from this function is useful in creating subsets of data meeting
     survey-eligibility requirements.
 }
+\note{
+Internal function, NOT EXPORTED
+}
 \examples{
 # Returns a vector of SIDs of individuals who were short-survey (NQ)
 # eligible at wave 1, from school #3.

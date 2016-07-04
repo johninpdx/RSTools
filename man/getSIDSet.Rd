@@ -30,7 +30,8 @@ This function is a bit slow, probably because it uses calls to
 }
 \details{
 Used by other functions in this package (e.g. getNetworkSet).
-    Could be used stand-alone but is not really designed to be.
+    Could be used stand-alone, e.g. if you want to draw an Analysis Set
+    without having to create a list of networks with 'getNetworkSet'.
 }
 \examples{
 # Obtains the SID set for a network analysis:

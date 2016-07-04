@@ -35,5 +35,6 @@ To make connections between two wave 1 middle schools impossible,
 \note{
 This function should not normally be used stand-alone. To see how it
     is used in context, consult the source code for 'getNetworkSet'.
+    NOT EXPORTED
 }
 

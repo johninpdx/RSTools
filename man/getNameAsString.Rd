@@ -17,6 +17,9 @@ This function just removes the need to look up how to do this (fairly
     common) operation, which I seem to have to do all the time, because
     I can't remember the (little used) syntax.
 }
+\note{
+Internal Function; NOT EXPORTED
+}
 \examples{
 # Returns c("myVariable")
 vStr <- getNameAsString(myVariable)

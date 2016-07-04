@@ -94,13 +94,11 @@ FxCovBSD <- getFixedCovs(c(3,4,5,6,30))
 # ________________________________
 FxCovBSD.did1 <- FxCovBSD[FxCovBSD$SID %in% netSetSID.did1,]
 
-#   S T A R T   H E R E
-
 # * Gender (Fxd Cov) ----
 Gndr <- FxCovBSD.did1$Gender    #1=M, 0=F
 
 # TVC/BDV's  ----
-TVCovBSD <- zero30dSU(getNQTVCs(c(1,3,4,5),c(3,4,5,6,30))) #BSD = Bethel School Dist.
+TVCovBSDz <- getNQTVCs(c(1,3,4,5),c(3,4,5,6,30)) #BSD = Bethel School Dist.
   length(unique(TVCovBSD$SID)) #count how many individuals
 
 # Selects only those who did at least 1 survey in the 5 waves. Some of the above

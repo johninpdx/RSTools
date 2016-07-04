@@ -21,6 +21,11 @@ This function can be used to calculate an age variable
 \details{
 Makes a call to the database using RODBC
 }
+\note{
+Draws data from vStudentCurrent (DB View), not the other 3 main
+    data tables, so it is included to provide this necessary DB
+    access, if DOB is required.
+}
 \examples{
 # Gets DOB for a couple of specific SIDs
 aFewDOBs <- getDOB(c(10, 11, 12))

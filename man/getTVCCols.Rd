@@ -33,6 +33,8 @@ Choices for pVar are:
     B3 (Binge drinking, freq in last 30 days),
     M3 (Marijuana use, freq in last 30 days),
     AL (Alcohol, freq of use, lifetime)
+
+NOT EXPORTED
 }
 \examples{
 # Internal function, not normally available to users. See 'makeTVTbl'
