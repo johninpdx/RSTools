@@ -147,7 +147,7 @@ ALTbl <- makeTVTbl(pTVTbl = TVCovBSD.did1,
                    pMaxNA = 0
                    )
 # Up-only indicator variable created from ALTbl
-AOTbl <- createOnset(ALTbl)
+AOTblz <- createOnset(ALTbl)
 
 # _____________________________________________________________________________
 # STEP 4: Create RSiena Objs ----

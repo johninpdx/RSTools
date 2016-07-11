@@ -1046,23 +1046,30 @@ allNQQNotNA <- function(pDF){
 #' This is a stand-alone scoring function that takes a wide-form data.table
 #'     or dataframe of 'lifetime use' variables for a (presumably consecutive)
 #'     set of waves, and transforms them into up-only variables with the value
-#'     1 when the participant first reports any lifetime use (zero prior to that).
+#'     1 when the participant first reports any lifetime use.
 #'
 #' @param pInDT A data.table (or dataframe) containing SID plus a lifetime use
 #'     (NA, 0, >0) variable for each of c-1 ordered time periods, where c is
 #'     the number of columns in the DF.
 #' @param pTHold The threshold (numerical value) for lifetime use; if the input
 #'     use variable value is >= pTHold, then the event 'occurred'.
-#' @return A data.table of the same dimension as the input data table, with rows
-#'     transformed into up-only variables suitable for use in proportional
-#'     hazard models, or onset/rate models (in RSiena)
-#' @details The logic assigns 1's to the output variables for all waves after the
-#'     first *known* positive instance (value >= pTHold) of the event. It also
-#'     ignores instances where a participant reports the event at wave w, but
-#'     then does not report any lifetime use at some wave w+k. Instead, the
-#'     value of the onset variable will be 1 from the first instance of the event
-#'     on. Also if there are NAs prior to an event being observed, these are all
-#'     output as zeros.
+#' @return A data.table of the same dimension as the input data table, with
+#'     rows transformed into up-only variables suitable for use in proportional
+#'     hazard models, or onset/rate models (in RSiena).
+#' @details The logic assigns 1's to the output variables for all waves after
+#'     the first *known* positive instance (KPI; value >= pTHold) of the event.
+#'     It also ignores instances where a participant reports the event at wave
+#'     w, but then does not report any lifetime use at some wave w+k. Instead,
+#'     the value of the onset variable will be 1 from the first instance of
+#'     the event on. For waves prior to the KPI, NAs are changed to 0 if they
+#'     preceded a non-KPI event (value < pTHold), but left as NAs otherwise.
+#' @note The effect of this coding logic is as follows: (a) If the 'onset'
+#'     variable is NA for either wave w or wave w+1, then that individual
+#'     will be included in target statistics for onset between those two
+#'     waves, but with a value equal to the overall mean (typically 0, since
+#'     the variable will be centered). (b) The individual will
+#'     participate in the simulations, with the assumption that the missing
+#'     value had the sample mean value at whichever wave it was missing.
 #' @examples
 #' # Returns a table of up-only variables which have the value 0 before the
 #' # first known lifetime alcohol use (if any such times are available), and 1
@@ -1075,22 +1082,45 @@ createOnset <- function(pInDT,pTHold=1){
 # ____________________
   colnum <- dim(pInDT)[2]
   rownum <- dim(pInDT)[1]
-  OutDT  <- pInDT
-     OutDT[,2:colnum] <- 0
-  foundEvent <- 0 #Flag gets set if any 'event' is found
+  outDT  <- pInDT
+  #   OutDT[,2:colnum] <- 0
+  outDT[,2:colnum] <- NA
   for (i in 1:rownum){
+    foundEvent <- 0    #Flag gets set if any 'event' is found
+    foundNonEvent <- 0 #Flag gets set if non-NA value < pTHold is found
   for (j in 2:colnum){
     if (!is.na(pInDT[[i,j]])){
     if (pInDT[[i,j]]>=pTHold){
       foundEvent <- 1
+      # Fill 1's from here forward
       for (k in j:colnum){
-        OutDT[[i,k]] <- 1
+        outDT[[i,k]] <- 1
       }
+      # Fill 0's back from the event (assumes any
+      # intervening NA is a zero..but at leats you
+      # know there was a definite 0 at some point)
+      if(foundNonEvent >= 2){
+      for (k in 2:(j-1)){
+        outDT[[i,k]] <- 0
+      }
+      }
+      # Move to next row
       break
-    }} #nested Ifs
-   }#i loop
-  } #j loop
-  return(OutDT)
+    } else {
+      foundNonEvent <- j # A "0" (nonevent)
+    }
+      } #nested Ifs
+   }#j loop -- end of table row scan
+    if(foundEvent == 0 & foundNonEvent > 0){
+      # The event never occurred
+      # In this case we can fill with 0's
+      # backwards from the last 0
+      for (k in 2:foundNonEvent){
+        outDT[[i,k]] <- 0
+      }
+    }
+  } #i loop
+  return(outDT)
 }
 
 # FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -1118,9 +1148,8 @@ createOnset <- function(pInDT,pTHold=1){
 #'     ignores instances where a participant reports the event at wave w, but
 #'     then does not report any lifetime use at some wave w+k. Instead, the
 #'     value of the onset variable will be 1 from the first instance of the event
-#'     on. Also if there are NAs prior to an event being observed, these are all
-#'     output as zeros. These considerations all still apply, even though the
-#'     onset event is lagged one period.
+#'     on. If there are NAs prior to an event being observed, these are all
+#'     output as zeros (which is different than for 'createOnset'.
 #' @examples
 #' # Returns a table of 1-period lagged up-only variables which have the value 0
 #' # before the first known lifetime alcohol use (if any such times are

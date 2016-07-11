@@ -33,9 +33,8 @@ The logic assigns 1's to the output variables for all waves after the
     ignores instances where a participant reports the event at wave w, but
     then does not report any lifetime use at some wave w+k. Instead, the
     value of the onset variable will be 1 from the first instance of the event
-    on. Also if there are NAs prior to an event being observed, these are all
-    output as zeros. These considerations all still apply, even though the
-    onset event is lagged one period.
+    on. If there are NAs prior to an event being observed, these are all
+    output as zeros (which is different than for 'createOnset'.
 }
 \examples{
 # Returns a table of 1-period lagged up-only variables which have the value 0

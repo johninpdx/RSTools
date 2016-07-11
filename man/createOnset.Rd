@@ -15,24 +15,33 @@ the number of columns in the DF.}
 use variable value is >= pTHold, then the event 'occurred'.}
 }
 \value{
-A data.table of the same dimension as the input data table, with rows
-    transformed into up-only variables suitable for use in proportional
-    hazard models, or onset/rate models (in RSiena)
+A data.table of the same dimension as the input data table, with
+    rows transformed into up-only variables suitable for use in proportional
+    hazard models, or onset/rate models (in RSiena).
 }
 \description{
 This is a stand-alone scoring function that takes a wide-form data.table
     or dataframe of 'lifetime use' variables for a (presumably consecutive)
     set of waves, and transforms them into up-only variables with the value
-    1 when the participant first reports any lifetime use (zero prior to that).
+    1 when the participant first reports any lifetime use.
 }
 \details{
-The logic assigns 1's to the output variables for all waves after the
-    first *known* positive instance (value >= pTHold) of the event. It also
-    ignores instances where a participant reports the event at wave w, but
-    then does not report any lifetime use at some wave w+k. Instead, the
-    value of the onset variable will be 1 from the first instance of the event
-    on. Also if there are NAs prior to an event being observed, these are all
-    output as zeros.
+The logic assigns 1's to the output variables for all waves after
+    the first *known* positive instance (KPI; value >= pTHold) of the event.
+    It also ignores instances where a participant reports the event at wave
+    w, but then does not report any lifetime use at some wave w+k. Instead,
+    the value of the onset variable will be 1 from the first instance of
+    the event on. For waves prior to the KPI, NAs are changed to 0 if they
+    preceded a non-KPI event (value < pTHold), but left as NAs otherwise.
+}
+\note{
+The effect of this coding logic is as follows: (a) If the 'onset'
+    variable is NA for either wave w or wave w+1, then that individual
+    will be included in target statistics for onset between those two
+    waves, but with a value equal to the overall mean (typically 0, since
+    the variable will be centered). (b) The individual will
+    participate in the simulations, with the assumption that the missing
+    value had the sample mean value at whichever wave it was missing.
 }
 \examples{
 # Returns a table of up-only variables which have the value 0 before the
