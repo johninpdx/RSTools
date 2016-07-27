@@ -48,7 +48,7 @@
 #'     access, if DOB is required.
 #' @export
 getDOB <- function(pSIDVec){
-  #' @import RODBC
+#' @import RODBC
   # ________________
   dobQuery <- paste ("SELECT SID,DOB",
                      " From vStudentCurrent",
@@ -92,8 +92,8 @@ getDOB <- function(pSIDVec){
 #' fc <- getFixedCovs(c(3,4,5,6,30)
 #' @export
 getFixedCovs <- function(pSchVec){
-  #' @import RODBC
-  # _______________
+#' @import RODBC
+# _______________
   smQuery <- paste ("SELECT * From PInf1.dbo.SMaster WHERE SID IN ",
                     "(SELECT Distinct SID From PInf1.dbo.qqelig ",
                     "WHERE SchID In (",paste(pSchVec,collapse=","),
@@ -135,8 +135,8 @@ getFixedCovs <- function(pSchVec){
 #' net <- getNetwork(c(1,3,4), c(3,4,5,6,30))
 #' @note Internal function, NOT EXPORTED
 getNetwork <- function(pWavVec,pSchVec){
-  #' @import RODBC
-  # ____________
+#' @import RODBC
+# ____________
   dbQuery <- paste("SELECT * From PInf1.dbo.SAffiliation ",
                    "WHERE SchID In (",paste(pSchVec,collapse=","),
                    ") AND WID IN (",paste(pWavVec,collapse=","),")")
@@ -148,7 +148,7 @@ getNetwork <- function(pWavVec,pSchVec){
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> getNQTVCs <<
 #______________________________________________________________________________
-# Uses: pkgs 'RODBC', 'data.table'
+# Uses: pkgs 'RODBC', 'dtplyr', 'dplyr', 'data.table'
 # Used by: 'makeTVTbl'
 # _____________________________________________________________________________
 #' Returns a data.table of Short-Survey time-varying covariates
@@ -174,8 +174,9 @@ getNetwork <- function(pWavVec,pSchVec){
 #' tvcs <- getNQTVCs(c(1, 3, 4), c(3, 4, 5, 6, 30))
 #' @export
 getNQTVCs <- function(pWavVec,pSchVec){
-  #' @import RODBC
-  #' @import data.table
+#' @import RODBC
+#' @import data.table
+#' @import dtplyr
   # _________________
   nqQuery <- paste ("SELECT SchID, SID, WID, ULied,UHit,UMean,USkip,UDamage,
                     ULate,UFam,","UOKids,ONames,OHit,OThreat,ONoTalk,OExclu,
@@ -197,7 +198,7 @@ getNQTVCs <- function(pWavVec,pSchVec){
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> getSWNodes <<
 # _____________________________________________________________________________
-# Uses: pkgs 'RODBC', 'data.table'
+# Uses: pkgs 'RODBC', 'dtplyr', 'dplyr', 'data.table'
 # Used by: getEligNodes, getEligXWave, getMSRIDVecs
 # _____________________________________________________________________________
 #' Returns a vector of SIDs for Short or Long-form survey-eligibles
@@ -221,8 +222,9 @@ getNQTVCs <- function(pWavVec,pSchVec){
 #' nodes <- getNQTVCs(pWav = 1, pSch = 3, pNQW = 1)
 #' @note Internal function, NOT EXPORTED
 getSWNodes <- function(pWav, pSch, pNQW = 1, pFQW = 0){
-  #' @import RODBC
-  #' @import data.table
+#' @import RODBC
+#' @import data.table
+#' @import dtplyr
   # _____________
   # Infer cohort from SchID
   coh1Schools <-c(1,2,3,4,5,6,10,20,30,31)
@@ -275,7 +277,8 @@ getSWNodes <- function(pWav, pSch, pNQW = 1, pFQW = 0){
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> getDiditXWave <<
 # _____________________________________________________________________________
-# Uses: getNQTVCs, AllNQNotNA, pkg 'RODBC' (indirect), pkg 'data.table'
+# Uses: getNQTVCs, AllNQNotNA, pkg 'RODBC' (indirect), pkg 'dtplyr'
+#       pkg 'dplyr'
 # _____________________________________________________________________________
 #' Returns dataframe with flags indicating survey completion
 #'
@@ -299,8 +302,9 @@ getSWNodes <- function(pWav, pSch, pNQW = 1, pFQW = 0){
 #' @export
 getDiditXWave <- function(pWavVec,pSchVec){
 #' @import data.table
+#' @import dtplyr
+  # __________________
   cat("Obtaining survey completion info...", "\n")
-  # require(data.table)
   #Get a node list of all eligible, so the output DF records participation
   #  for all eligible at any wave
   allNodes <- getEligNodes(pWavVec,pSchVec)
@@ -534,6 +538,7 @@ getMSRIDVecs <- function(mSchVec, sidRowID){
 getNetworkSet <- function(pWavVec, pSchVec, pElig=1, pDid=1, pTyp="BF",
                           pOut = "SP", pS0 = ""){
 #' @import data.table
+#' @import dtplyr
 #' @import network
 #' @import Matrix
   # ______________________
@@ -784,7 +789,7 @@ makeSAOMNet <- function(pNetInput){
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> makeTVTbl <<<
 # _____________________________________________________________________________
-# Uses: getTVCCols, pkgs dplyr, data.table
+# Uses: getTVCCols, pkgs dplyr, dtplyr (combines data.table and dplyr)
 # _____________________________________________________________________________
 #' Returns a data.table of a time varying behavior variable
 #'
@@ -839,9 +844,12 @@ makeSAOMNet <- function(pNetInput){
 #' # and with no more than 3 NAs out of the 6 items.
 #' abTbl <- makeTVTbl(ccTbl, netList[[4]], pVar = "AB",
 #'     pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
+#'
+#' @importFrom stats reshape
 #' @export
 makeTVTbl <- function(pTVTbl, pSIDs, pVar="X", pCut = c(0), pMaxNA = 1){
 #' @import data.table
+#' @import dtplyr
 # _____________________
   if (pVar == "X"){
     cat("Warning: No var name supplied; name defaults to X", "\n")
@@ -849,6 +857,7 @@ makeTVTbl <- function(pTVTbl, pSIDs, pVar="X", pCut = c(0), pMaxNA = 1){
   # Create a name for the binned (final form, scaled) variable:
   binVar <- paste(pVar,"B", sep = "") # Name of binned variable (e.g."ABB", ..)
   # Select only the SIDs from the input data.table to be used in the analysis
+  # (dplyr used for 'filter')
   tvDT <- data.table(dplyr::filter(pTVTbl,SID %in% pSIDs))
   setkey(tvDT, SID, WID)
 
@@ -914,7 +923,7 @@ schWvExists <- function(pWav,pSch){
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> s0Assemble <<
 # _____________________________________________________________________________
-# Uses: s0Make
+# Uses: s0Make, data.table
 # Used by: getNetworkSet
 # _____________________________________________________________________________
 #' Returns a data.table with structural 0's for w1 middle schools
@@ -937,6 +946,7 @@ schWvExists <- function(pWav,pSch){
 s0Assemble <- function(pMSchVec){
   # Calculate number of combinations (order irrelevant)
 #' @import data.table
+#______________________
 # (actually it's s0Make that uses DTs ...)
   ll <- choose(length(pMSchVec),2)
   numSch <- length(pMSchVec)
@@ -985,6 +995,7 @@ s0Assemble <- function(pMSchVec){
 #'     NOT EXPORTED
 s0Make <- function(pVec1, pVec2){
 #' @import data.table
+#' @import dtplyr
   # ________________
   # calculate number of rows needed (all combinations ofIDs, in
   #  both directions)
@@ -1023,11 +1034,6 @@ s0Make <- function(pVec1, pVec2){
 #'     any of the questions addressed below (lifetime substance use questions)
 #'     were answered, 0 otherwise.
 #' @details Used by 'getDidItXWave' to set values for the returned dataframe.
-#' @examples
-#' # Returns the table of time varying covariates produced by 'getNQTVCs' with
-#' # the column 'DidIt' added, for the schools and waves in pSchVec and pWavVec.
-#' tvc <- allNQQNotNA(getNQTVCs(pWavVec = c(1, 3, 4),
-#'                              pSchVec = c(3, 4, 5, 6, 30)))
 #' @note Internal function, NOT EXPORTED
 allNQQNotNA <- function(pDF){
   pDF$DidIt <- ifelse(!is.na(pDF$ULied) | !is.na(pDF$UHit)
@@ -1074,11 +1080,19 @@ allNQQNotNA <- function(pDF){
 #' # Returns a table of up-only variables which have the value 0 before the
 #' # first known lifetime alcohol use (if any such times are available), and 1
 #' # thereafter. The pTHold value of 1 means *any* use.
-#' alcLife <- makeTVTbl(getNQTVCs(c(1,3,4),c(3,4,5,6,30)))
+#' # Get network 'Analysis Set'; last list element is unique SIDs
+#' netList <- getNetworkSet(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
+#' # Get table of TVCs for these waves and schools
+#' ccTbl <- getNQTVCs(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
+#' # Make TVC table for 'lifetime alc freq of use'
+#' alcLife <- makeTVTbl(ccTbl, netList[[4]], pVar = "AL",
+#'     pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
+#' # Create onset variable
 #' alcOnset <- createOnset(alcLife,pTHold = 1)
 #' @export
 createOnset <- function(pInDT,pTHold=1){
 #' @import data.table
+#' @import dtplyr
 # ____________________
   colnum <- dim(pInDT)[2]
   rownum <- dim(pInDT)[1]
@@ -1154,11 +1168,15 @@ createOnset <- function(pInDT,pTHold=1){
 #' # Returns a table of 1-period lagged up-only variables which have the value 0
 #' # before the first known lifetime alcohol use (if any such times are
 #' # available), and 1 thereafter. The pTHold value of 1 means *any* use.
-#' alcLifeLag <- makeTVTbl(getNQTVCs(c(1, 3, 4), c(3, 4, 5, 6, 30)))
-#' alcOnsetLag <- createOnset(alcLifeLag, pTHold = 1)
+#' netList <- getNetworkSet(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
+#' ccTbl <- getNQTVCs(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
+#' alcLifeLag <- makeTVTbl(ccTbl, netList[[4]], pVar = "AL",
+#'     pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
+#' alcOnsetLag <- createNbhdOnset(alcLifeLag, pTHold = 1)
 #' @export
 createNbhdOnset <- function(pInDT,pTHold=1){
 #' @import data.table
+#' @import dtplyr
 # ____________________
   # pInDT is a data.table (or dataframe) with 1 row for each subject.
   # The first column is SID
@@ -1228,11 +1246,15 @@ createNbhdOnset <- function(pInDT,pTHold=1){
 #' # before the first known lifetime alcohol use (if any such times are
 #' # available), 1 on the occasion prior to onset, and 2 thereafter.
 #' # The pTHold value of 1 means *any* use.
-#' alcLifeLag <- makeTVTbl(getNQTVCs(c(1, 3, 4), c(3, 4, 5, 6, 30)))
-#' alcOnsetLag <- createOnset(alcLifeLag, pTHold = 1
+#' netList <- getNetworkSet(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
+#' ccTbl <- getNQTVCs(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
+#' alcLifeLag <- makeTVTbl(ccTbl, netList[[4]], pVar = "AL",
+#'     pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
+#' alcNewOnset <- createNewOnset(alcLifeLag, pTHold = 1)
 #' @export
 createNewOnset <- function(pInDT,pTHold=1){
 #' @import data.table
+#' @import dtplyr
 # ____________________
   # pInDT is a data.table (or dataframe) with 1 row for each subject.
   # The first column is SID
@@ -1425,6 +1447,7 @@ makeCCVec <- function(pElig){
 #' @export
 netVtxAttr <- function(pAttrMasterDF,pSIDVec,pNetwork) {
 #' @import data.table
+#' @import dtplyr
 # ___________________ #NOTE: does not use data.table YET ...
   # Check a few things
   if (length(pAttrMasterDF)!=2){
@@ -1466,6 +1489,8 @@ netVtxAttr <- function(pAttrMasterDF,pSIDVec,pNetwork) {
 #'     NOT EXPORTED
 zero30dSU <- function(pDT){
 #' @import data.table
+#' @import dtplyr
+#___________________
   # The pDF has to be a data.table in the format created
   # by 'getNQVTCs' or equivalent
 

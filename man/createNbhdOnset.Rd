@@ -40,7 +40,10 @@ The logic assigns 1's to the output variables for all waves after the
 # Returns a table of 1-period lagged up-only variables which have the value 0
 # before the first known lifetime alcohol use (if any such times are
 # available), and 1 thereafter. The pTHold value of 1 means *any* use.
-alcLifeLag <- makeTVTbl(getNQTVCs(c(1, 3, 4), c(3, 4, 5, 6, 30)))
-alcOnsetLag <- createOnset(alcLifeLag, pTHold = 1)
+netList <- getNetworkSet(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
+ccTbl <- getNQTVCs(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
+alcLifeLag <- makeTVTbl(ccTbl, netList[[4]], pVar = "AL",
+    pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
+alcOnsetLag <- createNbhdOnset(alcLifeLag, pTHold = 1)
 }
 

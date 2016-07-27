@@ -25,10 +25,4 @@ Used by 'getDidItXWave' to set values for the returned dataframe.
 \note{
 Internal function, NOT EXPORTED
 }
-\examples{
-# Returns the table of time varying covariates produced by 'getNQTVCs' with
-# the column 'DidIt' added, for the schools and waves in pSchVec and pWavVec.
-tvc <- allNQQNotNA(getNQTVCs(pWavVec = c(1, 3, 4),
-                             pSchVec = c(3, 4, 5, 6, 30)))
-}
 

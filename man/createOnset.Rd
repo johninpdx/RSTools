@@ -47,7 +47,14 @@ The effect of this coding logic is as follows: (a) If the 'onset'
 # Returns a table of up-only variables which have the value 0 before the
 # first known lifetime alcohol use (if any such times are available), and 1
 # thereafter. The pTHold value of 1 means *any* use.
-alcLife <- makeTVTbl(getNQTVCs(c(1,3,4),c(3,4,5,6,30)))
+# Get network 'Analysis Set'; last list element is unique SIDs
+netList <- getNetworkSet(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
+# Get table of TVCs for these waves and schools
+ccTbl <- getNQTVCs(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
+# Make TVC table for 'lifetime alc freq of use'
+alcLife <- makeTVTbl(ccTbl, netList[[4]], pVar = "AL",
+    pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
+# Create onset variable
 alcOnset <- createOnset(alcLife,pTHold = 1)
 }
 

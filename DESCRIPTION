@@ -1,7 +1,7 @@
 Package: RSTools
 Type: Package
 Title: Data Mangement Tools for RSiena and Other Network Packages
-Version: 0.2.2
+Version: 0.2.3
 Authors@R: person("John", "Light", email = "jlight@ori.org",
     role = c("aut", "cre"))
 Maintainer: John Light <jlight@ori.org>
@@ -22,10 +22,11 @@ LazyData: true
 Imports:
     data.table,
     dplyr,
+    dtplyr,
     Matrix,
     network,
     RODBC,
-    RSienaTest
+    RSiena
 RoxygenNote: 5.0.1
 Suggests: knitr,
     rmarkdown

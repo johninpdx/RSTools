@@ -72,5 +72,6 @@ ccTbl <- getNQTVCs(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
 # and with no more than 3 NAs out of the 6 items.
 abTbl <- makeTVTbl(ccTbl, netList[[4]], pVar = "AB",
     pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
+
 }
 
