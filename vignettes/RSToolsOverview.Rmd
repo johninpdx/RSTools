@@ -30,7 +30,7 @@ The analyst or data scientist is forced to contemplate more logical and
 efficient data structures, which however are also more complicated. Further,
 there is no particular consensus on what these data structures should look
 like, and in most statistical software (e.g. SPSS, SAS, Stata) no machinery
-either for creating a workable structure, or for accessing the data in it
+exists either for creating a workable structure, or for accessing the data in
 in analytically meaningful ways. There is the additional problem of 
 reproducability--subsets of data need to be easily linked to analyses
 performed on them, and the more complicated the relevant scripts become,

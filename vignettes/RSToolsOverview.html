@@ -12,7 +12,7 @@
 
 <meta name="author" content="John Light" />
 
-<meta name="date" content="2016-07-03" />
+<meta name="date" content="2016-07-29" />
 
 <title>RSiena Tools: An Overview</title>
 
@@ -32,14 +32,14 @@
 
 <h1 class="title toc-ignore">RSiena Tools: An Overview</h1>
 <h4 class="author"><em>John Light</em></h4>
-<h4 class="date"><em>2016-07-03</em></h4>
+<h4 class="date"><em>2016-07-29</em></h4>
 
 
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>Social network data is inherently complicated. In ordinary survey analysis, one typically has data on individuals, i.e., one row of a table per individual, with a set of variables (observations on that individual) extending across rows. If the study in question is longitudinal, there will typically be multiple such records for each individual, one for each observational period (wave). Some of these variables may be fixed, however (such as DOB, gender, etc.), raising the question whether these should be kept in a separate table, linked to the longitudinal variables by a subject ID (SID). However, since most statistical analysis software cannot handle SQL-style table joins, this type of data organization is generally fudged, by including fixed variables repetitively, along with actual time-varying variables, from one wave record to the next. But at least the familiar two-dimensional data structure can be retained.</p>
-<p>Where social network data are involved, this fudge is not available. The analyst or data scientist is forced to contemplate more logical and efficient data structures, which however are also more complicated. Further, there is no particular consensus on what these data structures should look like, and in most statistical software (e.g. SPSS, SAS, Stata) no machinery either for creating a workable structure, or for accessing the data in it in analytically meaningful ways. There is the additional problem of reproducability–subsets of data need to be easily linked to analyses performed on them, and the more complicated the relevant scripts become, the greater the chances of error and confusion.</p>
+<p>Where social network data are involved, this fudge is not available. The analyst or data scientist is forced to contemplate more logical and efficient data structures, which however are also more complicated. Further, there is no particular consensus on what these data structures should look like, and in most statistical software (e.g. SPSS, SAS, Stata) no machinery exists either for creating a workable structure, or for accessing the data in in analytically meaningful ways. There is the additional problem of reproducability–subsets of data need to be easily linked to analyses performed on them, and the more complicated the relevant scripts become, the greater the chances of error and confusion.</p>
 <p>The ‘RSTools’ package attempts to address some of these issues. It is a result of my experience in setting up social network analyses over the last 13 years. In earlier times and with simpler studies (e.g. just survey data, typically longitudinal) I was able to get by with a more ad hoc approach. I would maintain a core set of scoring code (for multi-item variables and such), but tended to build subfiles in a very analysis-specific way, using file names and folders as a way of separating different sub-projects. This worked pretty well most of the time, but invariably led to code duplication due to lack of modularity, and a kind of rolling complexification that always seemed to occur as a project moved forward.</p>
 <p>The package implements a project-specific set of social network data management functions, but attempts to do so based on principled design considerations. The functions (a) pull data from a raw (but clean) data repository, (b) create useful intermediate objects that can be kept in a workspace and used for (c) creating data objects that can be used by the social network analysis packages ‘network’ and ‘RSiena’. At least for the particular project it has been implemented for (ORI’s “Peer Influences” project, J. Light &amp; J.C. Rusby, Co-principal Investigators), it implies a specific, straightforward, clean, and highly reproduceable workflow. It remains to be seen how well this approach translates to other projects, but at least it may provide a kind of roadmap for package development in other analytical contexts.</p>
 <p>The name ‘RSTools’ was chosen because the primary analyses anticipated are Snijders’ Stochastic Actor Oriented Models (SAOMs), as implemented by the package ‘RSiena’. However it turns out that ‘network’-class networks– which RSiena cannot utilize directly–are also very handy, as they are easily graphed, and both the ‘network’ and ‘sna’ packages can be applied to calculate various descriptive statistics for ‘network’-class objects at the network, vertex, and edge level. Consequently, the workflow assumes that both dgTMatrix (sparse matrix) and network-class networks will be desired, and there should be a way to create them from the same underlying, known-consistent sets of data objects.</p>
