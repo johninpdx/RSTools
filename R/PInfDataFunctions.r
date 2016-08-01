@@ -26,6 +26,55 @@
 # DB Layer Fns ----------------------------------------------------------
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# >> updateStuEligWindow <<
+# _____________________________________________________________________________
+#' Returns TRUE if the Student Eligibility Window (S.E.W.) needs updating.
+#'
+#' The table 'dbo.StudentEligibilityWindow in the database table has 1 row
+#'     for each eligibility period (startdate, enddate)
+#'     for each student who was ever survey-eligible. If Eligibility has
+#'     not expired, the enddate will be set to the last date the update
+#'     sproc (called dbo.StudentEligibilityWindows) was run.
+#'
+#' @details There are no parameters; the sproc simply obtains the date
+#'     that the S.E.W. was last updated, and then the
+#'     most recent date of any survey in the table dbo.SWave (which records
+#'     wave-specific survey data by participating student), and compares
+#'     the two. If the last S.E.W. was more recent
+#'     than the most recent survey, no update is needed (return FALSE);
+#'     otherwise, it is needed (return TRUE).
+#'
+#' @note This function is mainly to be used internally, but a user might
+#'     consider calling it out of curiosity, as to when the last S.E.W.
+#'     table update occurred.
+#'
+#' @return A logical variable
+#' @export
+checkEligUpdate <- function(){
+#' @import RODBC
+#' @import data.table
+cat("Checking whether Student Eligibility Window update is needed",
+    "\n")
+#______________________________________________________________
+  sewQuery <- paste("SELECT Max(EndDate)",
+                    " From PInf1.dbo.StudentEligibilityWindow")
+  conn <- RODBC::odbcConnect(dsn="PInf1")
+  dt <- data.table(RODBC::sqlQuery(conn,sewQuery))[1,V1]
+  dtlastUpdate<- as.POSIXct(as.character(dt))
+#_____________________________________________________________
+  wvQuery <- paste("SELECT Max(AssessmentDateTime)",
+                   " From PInf1.dbo.SWave")
+  dt <- data.table(RODBC::sqlQuery(conn,wvQuery))[1,V1]
+  dtlastSurvey <- as.POSIXct(as.character(dt))
+  if (dtlastSurvey >= dtlastUpdate) {
+    cat("SEW update required...", "\n")
+    return(TRUE)
+  } else{
+    cat("SEW is up to date.", "\n")
+    return(FALSE)}
+}
+
+#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> getDOB <<
 # _____________________________________________________________________________
 # Uses: RODBC
@@ -216,6 +265,11 @@ getNQTVCs <- function(pWavVec,pSchVec){
 #' @param pFQ If 1, only long-survey-eligible SIDs in this wave and school are
 #'     returned.
 #' @return An integer vector of SIDs
+#' @note This function will not necessarily return correct SIDs if the
+#'     table dbo.StudentEligibilityWindow is not up to date. The calling
+#'     code should always check this first! If 'checkEligUpdate' returns
+#'     FALSE, you're OK. If not, the code should first run
+#'     'updateStuEligWin'
 #' @examples
 #' # Returns a vector of SIDs of individuals who were short-survey (NQ)
 #' # eligible at wave 1, from school #3.
@@ -239,6 +293,7 @@ getSWNodes <- function(pWav, pSch, pNQW = 1, pFQW = 0){
   if ((pCoh==1 & pPer>11) | (pCoh==2 & pPer>15) | pWav %in% c(2,6,10)){
     stop("Wave # ",pWav," does not exist or is a summer wave (no data)")
   }
+  #_____________
   # Extract data
   conn <- odbcConnect("PInf1")
   # The sproc called here creates a DB table of survey-eligible kids for this
@@ -269,6 +324,41 @@ getSWNodes <- function(pWav, pSch, pNQW = 1, pFQW = 0){
     nodes <- nodes_temp[SID %w/o% SIDDifSch & !is.na(SID)] # The 'eligible' data.table
 
     return (nodes[SchID == pSch,SID])
+  }
+}
+
+#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+# >> updateStuEligWin <<
+#______________________________________________________________________________
+#' Runs DB sproc to update the Student Eligibility Windows table
+#'
+#' The table 'dbo.StudentEligibilityWindow' contains a row for each time
+#'     period any ever-eligible participant's eligibility status changed.
+#'
+#' @details The sproc 'dbo.StudentEligibilityWindows' (note final 's'!)
+#'     is executed.
+#' @return A completion code is returned. If it is 0, the sproc executed OK.
+#'     If it is 100 there was some kind of error.
+#' @export
+updateStuEligWin <- function(){
+#' @import RODBC
+#' @import data.table
+exeQuery <- paste()
+conn <- odbcConnect("PInf1")
+# The sproc updates the table dbo.StudentEligibilityWindow.
+# ____________________________________________________
+cat ("Updating Student Eligibility Window; this takes a minute or two...", "\n")
+#_____________________________________________________
+exeQuery <- paste("exec PInf1.dbo.StudentEligibilityWindows")
+retcode <- sqlQuery(conn, exeQuery, errors = TRUE)
+# If 'check' returns FALSE, table is updated (or requires no update)
+if(checkEligUpdate() == FALSE) {
+  cat("SEW update completed successfully.", "\n")
+  return(0)
+} else {
+  cat ("WARNING: SEW update failed; there may be a problem with the database.",
+       "\n")
+  return(100)
   }
 }
 
@@ -348,8 +438,13 @@ getDiditXWave <- function(pWavVec,pSchVec){
 #' sidVec <- getSIDSet(c(1, 3, 4, 5), c(3, 4, 5, 6, 30), 1, 1)
 #' @export
 getEligNodes <- function(pWavVec, pSchVec){
+  # __________
+  # Check Student Eligibility Window status
+  if (checkEligUpdate()) retCode <- updateStuEligWin()
+  # __________
   # For efficiency, we create a list of
   # length w x s and create a vector of SIDs for each school/wave combination
+  cat("Fetching eligible nodes...", "\n")
   sidHolder <- vector("list", length(pWavVec)*length(pSchVec))
   for (i in seq_along(pWavVec)){
     for (j in seq_along(pSchVec)){
@@ -358,6 +453,7 @@ getEligNodes <- function(pWavVec, pSchVec){
                                                            pSch = pSchVec[j])
     }
   }
+  cat("Done", "\n")
   # Combines unique SIDs into a sorted vector
   return (sort(unique(unlist(sidHolder))))
 }
@@ -391,7 +487,11 @@ getEligNodes <- function(pWavVec, pSchVec){
 #' EligXWave <- getEligXWave(c(1,3,4,5), c(3,4,5,6,30))
 #' @export
 getEligXWave <- function(pWavVec,pSchVec){
+  # Check Student Eligibility Window status
+  #__________
+  if (checkEligUpdate()) retCode <- updateStuEligWin()
   # Get the eligible node list for each wave
+  # __________
   cat("Obtaining survey eligibility info...", "\n")
   nodeList <- vector("list",length(pWavVec))
   allNodes <- numeric()
@@ -459,6 +559,10 @@ getEligXWave <- function(pWavVec,pSchVec){
 #' msIDList <- getMSRIDVecs (mSchVec, sidRowID)
 #' @note Internal Function, NOT EXPORTED
 getMSRIDVecs <- function(mSchVec, sidRowID){
+  # Check Student Eligibility Window status
+  #__________
+  if (checkEligUpdate()) retCode <- updateStuEligWin()
+  # __________
   outList <- vector(mode = "list", length = length(mSchVec))
   for(i in 1:length(mSchVec)){
     holdr1 <- getSWNodes(1,mSchVec[i])
@@ -919,6 +1023,7 @@ schWvExists <- function(pWav,pSch){
     return(FALSE)
   }
 }
+
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> s0Assemble <<

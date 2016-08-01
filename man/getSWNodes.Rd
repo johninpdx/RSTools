@@ -28,6 +28,12 @@ Output from this function is useful in creating subsets of data meeting
     survey-eligibility requirements.
 }
 \note{
+This function will not necessarily return correct SIDs if the
+    table dbo.StudentEligibilityWindow is not up to date. The calling
+    code should always check this first! If 'checkEligUpdate' returns
+    FALSE, you're OK. If not, the code should first run
+    'updateStuEligWin'
+
 Internal function, NOT EXPORTED
 }
 \examples{
