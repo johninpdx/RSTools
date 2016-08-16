@@ -1202,7 +1202,6 @@ createOnset <- function(pInDT,pTHold=1){
   colnum <- dim(pInDT)[2]
   rownum <- dim(pInDT)[1]
   outDT  <- pInDT
-  #   OutDT[,2:colnum] <- 0
   outDT[,2:colnum] <- NA
   for (i in 1:rownum){
     foundEvent <- 0    #Flag gets set if any 'event' is found
@@ -1243,77 +1242,6 @@ createOnset <- function(pInDT,pTHold=1){
 }
 
 # FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-# >> createNbhdOnset
-#______________________________________________________________________________
-#' Returns data.table of *lagged* binary, up-only 'onset' variables
-#'
-#' This stand-alone scoring function takes a wide-form data.table
-#'     or dataframe of 'lifetime use' variables for a (presumably consecutive)
-#'     set of waves, and transforms them into up-only variables. Event onset is
-#'     lagged one period. This data.table can be useful descriptively, because it
-#'     shows the 'network neighborhood' of individuals in the wave before they
-#'     onset to use. It is this neighborhood which presumably influenced onset
-#'     (if there was any such influence).
-#'
-#' @param pInDT A data.table (or dataframe) containing SID plus a lifetime use
-#'     (NA, 0, >0) variable for each of c-1 ordered time periods, where c is
-#'     the number of columns in the DF.
-#' @param pTHold The threshold (numerical value) for lifetime use; if the input
-#'     use variable value is >= pTHold, then the event 'occurred'.
-#' @return A data.table of the same dimension as the input data table, with rows
-#'     transformed into up-only variables suitable for descriptive use.
-#' @details The logic assigns 1's to the output variables for all waves after the
-#'     first *known* positive instance (value >= pTHold) of the event. It also
-#'     ignores instances where a participant reports the event at wave w, but
-#'     then does not report any lifetime use at some wave w+k. Instead, the
-#'     value of the onset variable will be 1 from the first instance of the event
-#'     on. If there are NAs prior to an event being observed, these are all
-#'     output as zeros (which is different than for 'createOnset'.
-#' @examples
-#' # Returns a table of 1-period lagged up-only variables which have the value 0
-#' # before the first known lifetime alcohol use (if any such times are
-#' # available), and 1 thereafter. The pTHold value of 1 means *any* use.
-#' netList <- getNetworkSet(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
-#' ccTbl <- getNQTVCs(pWavVec = c(1,3,4), pSchVec = c(3,4,5,6,30))
-#' alcLifeLag <- makeTVTbl(ccTbl, netList[[4]], pVar = "AL",
-#'     pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
-#' alcOnsetLag <- createNbhdOnset(alcLifeLag, pTHold = 1)
-#' @export
-createNbhdOnset <- function(pInDT,pTHold=1){
-#' @import data.table
-#' @import dtplyr
-# ____________________
-  # pInDT is a data.table (or dataframe) with 1 row for each subject.
-  # The first column is SID
-  # The second through cth columns are 0 if the event has not yet occurred
-  #   up to time (c-1), > pTHold if it has.
-  colnum <- dim(pInDT)[2]
-  rownum <- dim(pInDT)[1]
-  OutDT  <- pInDT
-  OutDT[,2:colnum] <- 0
-  foundEvent <- 0 #Flag gets set if any 'event' is found
-  for (i in 1:rownum){
-    for (j in 2:colnum){
-      if (!is.na(pInDT[[i,j]])){
-        if (pInDT[[i,j]]>=pTHold){
-          foundEvent <- 1
-          if ((j-1)>=2) {
-            OutDT[[i,j-1]] <- 1
-            OutDT[[i,j]] <- 2
-          } else {
-            OutDT[[i,j]] <- 2
-          }
-          for (k in j+1:colnum){
-            OutDT[[i,k]] <- 2
-          }
-          break
-        }} #nested Ifs
-    }#i loop
-  } #j loop
-  return(OutDT)
-}
-
-# FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> createNewOnset
 # _____________________________________________________________________________
 #' Returns data.table of lag-1 onset variables with 3 different values
@@ -1338,14 +1266,15 @@ createNbhdOnset <- function(pInDT,pTHold=1){
 #'     use variable value is >= pTHold, then the event 'occurred'.
 #' @return A data.table of the same dimension as the input data table, with rows
 #'     transformed into up-only variables suitable for descriptive use.
-#' @details The logic assigns 1's to the output variables for all waves after the
-#'     first *known* positive instance (value >= pTHold) of the event. It also
-#'     ignores instances where a participant reports the event at wave w, but
-#'     then does not report any lifetime use at some wave w+k. Instead, the
-#'     value of the onset variable will be 1 from the first instance of the event
-#'     on. Also if there are NAs prior to an event being observed, these are all
-#'     output as zeros. These considerations all still apply, even though the
-#'     onset event is lagged one period.
+#' @details The value of the output for an individual is coded 2 from the wave
+#'     he/she onsets to the final wave. IF (and only if) an affirmative
+#'     'no onset' (value < pTHold) response is found, the previous wave is
+#'     then given the value 1 ("ABOUT to onset"). An NA that follows only
+#'     other NAs or 'no onset' values is always coded NA. An NA that follows
+#'     an event (value >= pTHold) is always coded 2. An NA that precedes a
+#'     'no onset' value is coded 0. An NA that precedes an event is an NA,
+#'     unless it is followed by a 'no onset' before the event occurs, in
+#'     which case it is a zero, or if JUST before the event, a 1.
 #' @examples
 #' # Returns a table of 1-period lagged up-only variables which have the value 0
 #' # before the first known lifetime alcohol use (if any such times are
@@ -1367,23 +1296,47 @@ createNewOnset <- function(pInDT,pTHold=1){
   #   up to time (c-1), > pTHold if it has.
   colnum <- dim(pInDT)[2]
   rownum <- dim(pInDT)[1]
-  OutDT  <- pInDT
-  OutDT[,2:colnum] <- 0
-  foundEvent <- 0 #Flag gets set if any 'event' is found
+  outDT  <- pInDT
+  outDT[,2:colnum] <- 0
   for (i in 1:rownum){
+    foundEvent <- 0 #Flag gets set if any 'event' is found
+    found0 <- 0     #Flag gets set if a specific non-event is found
     for (j in 2:colnum){
       if (!is.na(pInDT[[i,j]])){
         if (pInDT[[i,j]]>=pTHold){
           foundEvent <- 1
-          OutDT[[i,j]] <- 1
-          for (k in j+1:colnum){
-            OutDT[[i,k]] <- 2
+          outDT[[i,j]] <- 2
+          if (found0 == 1){
+            # Set ABOUT TO onset at prev wave, *iff* we have affirmed
+            # 0 on the behavior in a previous wave
+            outDT[[i,j-1]] <- 1
           }
-          break
-        }} #nested Ifs
+          # Fill right with 2's
+          for (k in (j+1):colnum){
+            # (j+1)> colnum means no cols remain, so...
+            if(k <= colnum) outDT[[i,k]] <- 2
+          }
+          break # <<< go to next i
+        } else {
+          # the value is <= the threshold & no event has
+          # yet been found...so back fill with zeros
+          found0 <- 1
+            for(k in 2:j){
+              outDT[[i,k]] <- 0
+            }
+        }
+
+        } else {
+        # If the value IS NA...
+          if(foundEvent == 1){
+                outDT[[i,j]] <- 2
+          } else{
+          outDT[[i,j]] <- NA
+        }
+      } # if NA block
     }#i loop
   } #j loop
-  return(OutDT)
+  return(outDT)
 }
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF

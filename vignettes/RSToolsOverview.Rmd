@@ -359,7 +359,16 @@ use, so the function, **createOnset**, takes one of the 'lifetime' substance
 use response tables (e.g. ALTbl, per above) as input, and creates a variable
 that is 0 across columns 2:(W+1) until the respondent first indicates any
 (or some threshold of) lifetime use of that substance. From that wave on, 
-the variable has the value 1. 
+the variable has the value 1. The function **createNewOnset** creates
+a similar dataframe, except that in each wave w, an individual is given the 
+value 0 if he/she has not started behavior xx by wave w OR wave w+1, 1 if 
+he/she has not started the behavior by wave w but will start at wave w+1, 
+and 2 if he/she started the behavior at wave w. This scoring allows network
+visualizations showing the xx behavior of those connected to each
+individual who is about to onset (next wave) to xx, for a given wave. This
+can give a sense for whether affiliations with xx-behavers might encourage 
+new onsets; that is, an influence effect.
+
 
 ### Step 4: Create RSiena Objects
 
