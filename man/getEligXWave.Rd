@@ -35,4 +35,3 @@ A sproc 'PInf1.dbo.StudentSIDInWave' in the SQL Server database
 # survey at least once, and completed at least 1 survey in these waves.
 EligXWave <- getEligXWave(c(1,3,4,5), c(3,4,5,6,30))
 }
-

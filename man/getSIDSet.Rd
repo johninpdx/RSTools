@@ -37,4 +37,3 @@ Used by other functions in this package (e.g. getNetworkSet).
 # Obtains the SID set for a network analysis:
 SIDVec <- getSIDSet(c(1, 3, 4), c(3, 4, 5, 6, 30))
 }
-

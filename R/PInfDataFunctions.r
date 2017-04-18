@@ -52,7 +52,9 @@
 #' @export
 checkEligUpdate <- function(){
 #' @import RODBC
+#' @import dplyr
 #' @import data.table
+
 cat("Checking whether Student Eligibility Window update is needed",
     "\n")
 #______________________________________________________________
@@ -60,18 +62,29 @@ cat("Checking whether Student Eligibility Window update is needed",
                     " From PInf1.dbo.StudentEligibilityWindow")
   conn <- RODBC::odbcConnect(dsn="PInf1")
   dt <- data.table(RODBC::sqlQuery(conn,sewQuery))[1,V1]
-  dtlastUpdate<- as.POSIXct(as.character(dt))
+  dtlastUpdate <- as.character(dt) %>%
+                  as.POSIXct() %>%
+                  as.Date()
 #_____________________________________________________________
   wvQuery <- paste("SELECT Max(AssessmentDateTime)",
                    " From PInf1.dbo.SWave")
   dt <- data.table(RODBC::sqlQuery(conn,wvQuery))[1,V1]
-  dtlastSurvey <- as.POSIXct(as.character(dt))
-  if (dtlastSurvey >= dtlastUpdate) {
+  dtlastSurvey <- as.character(dt) %>%
+                  as.POSIXct() %>%
+                  as.Date()
+  if (dtlastSurvey > dtlastUpdate) {
     cat("SEW update required...", "\n")
     return(TRUE)
-  } else{
-    cat("SEW is up to date.", "\n")
-    return(FALSE)}
+  }
+  if(dtlastSurvey == dtlastUpdate){
+    cat("SEW updated today & up to date if no other surveys\n",
+        "have occurred since.\n")
+    return(FALSE)
+  }
+  if (dtlastSurvey < dtlastUpdate){
+  # if dtlastSurvey < dtlastUpdate
+  cat("SEW is up to date.\n")
+  return(FALSE)}
 }
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF

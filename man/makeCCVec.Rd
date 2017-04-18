@@ -32,4 +32,3 @@ The input dataframe must be the object returned by
 ccDF <- makeCCVec(getEligXWave(pWavVec = c(1,3,4),
     pSchVec = c(3,4,5,6,30)))
 }
-

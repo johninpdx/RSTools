@@ -37,4 +37,3 @@ Internal Function, NOT EXPORTED
 # two-column dataframe 'sidRowID'.
 msIDList <- getMSRIDVecs (mSchVec, sidRowID)
 }
-

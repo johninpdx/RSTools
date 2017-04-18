@@ -36,4 +36,3 @@ Standalone function for creating pkg 'network' node (vertex) attribute.
 ALDF.w1 <- netVtxAttr(AL134DF[,c("SID","al.1")],ds.winsSID1,ds.winsOBF1.no)
 ds.winsOBF1.no \%v\% "AlcOns" <- ALDF.w1$al.1
 }
-

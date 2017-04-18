@@ -34,4 +34,3 @@ Returns dataframe with flags indicating survey completion
 # survey at least once, and completed at least 1 survey in these waves.
 sidVec <- getSIDSet(c(1, 3, 4, 5), c(3, 4, 5, 6, 30), 1, 1)
 }
-

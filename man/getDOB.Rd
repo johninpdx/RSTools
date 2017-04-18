@@ -30,4 +30,3 @@ Draws data from vStudentCurrent (DB View), not the other 3 main
 # Gets DOB for a couple of specific SIDs
 aFewDOBs <- getDOB(c(10, 11, 12))
 }
-

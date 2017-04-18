@@ -18,4 +18,3 @@ The table 'dbo.StudentEligibilityWindow' contains a row for each time
 The sproc 'dbo.StudentEligibilityWindows' (note final 's'!)
     is executed.
 }
-

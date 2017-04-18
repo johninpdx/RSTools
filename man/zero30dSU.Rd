@@ -30,4 +30,3 @@ Survey skip logic skips over 30 day SU questions if no lifetime
 This function is a helper function for 'makeTVTbl'.
     NOT EXPORTED
 }
-

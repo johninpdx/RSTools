@@ -30,4 +30,3 @@ This function is a very thin wrapper for RSiena::sienaDependent (or
     pSchVec = c(3, 4, 5, 6, 30),
     pElig = 2, pDid = 2, pTyp = "BF", pOut = "SP", pS0 = "S0"))
 }
-

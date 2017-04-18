@@ -74,4 +74,3 @@ abTbl <- makeTVTbl(ccTbl, netList[[4]], pVar = "AB",
     pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
 
 }
-

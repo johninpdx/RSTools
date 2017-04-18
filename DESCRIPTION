@@ -1,7 +1,7 @@
 Package: RSTools
 Type: Package
 Title: Data Mangement Tools for RSiena and Other Network Packages
-Version: 0.3.2
+Version: 0.3.3
 Authors@R: person("John", "Light", email = "jlight@ori.org",
     role = c("aut", "cre"))
 Maintainer: John Light <jlight@ori.org>
@@ -27,7 +27,7 @@ Imports:
     network,
     RODBC,
     RSiena
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

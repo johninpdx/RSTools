@@ -30,4 +30,3 @@ This function is mainly to be used internally, but a user might
     consider calling it out of curiosity, as to when the last S.E.W.
     table update occurred.
 }
-

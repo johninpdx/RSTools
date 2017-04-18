@@ -80,4 +80,3 @@ myNet <- sienaNet(netList[1:3], sparse=T)
 # Even easier way, using 'makeSAOMNet' wrapper function
 myNet2 <- makeSAOMNet(netList)
 }
-

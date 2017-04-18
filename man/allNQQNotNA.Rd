@@ -25,4 +25,3 @@ Used by 'getDidItXWave' to set values for the returned dataframe.
 \note{
 Internal function, NOT EXPORTED
 }
-

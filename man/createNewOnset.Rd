@@ -54,4 +54,3 @@ alcLifeLag <- makeTVTbl(ccTbl, netList[[4]], pVar = "AL",
     pCut = c(0, .5, 1, 5, 20), pMaxNA = 3)
 alcNewOnset <- createNewOnset(alcLifeLag, pTHold = 1)
 }
-

@@ -30,4 +30,3 @@ If a participant switches schools (which happens regularly),
 # Gets table of fixed covariats for all the schools in 1 district
 fc <- getFixedCovs(c(3,4,5,6,30)
 }
-

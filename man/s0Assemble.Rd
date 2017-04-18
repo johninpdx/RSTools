@@ -28,4 +28,3 @@ This function should not normally be used stand-alone. To see how it
     is used in context, consult the source code for 'getNetworkSet'.
     NOT EXPORTED
 }
-

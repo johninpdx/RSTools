@@ -57,4 +57,3 @@ alcLife <- makeTVTbl(ccTbl, netList[[4]], pVar = "AL",
 # Create onset variable
 alcOnset <- createOnset(alcLife,pTHold = 1)
 }
-

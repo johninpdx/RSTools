@@ -39,4 +39,3 @@ Internal function, NOT EXPORTED
 # waves 1, 3, and 4, schools 3:6 and 30 (one school district).
 net <- getNetwork(c(1,3,4), c(3,4,5,6,30))
 }
-

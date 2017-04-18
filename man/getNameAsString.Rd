@@ -24,4 +24,3 @@ Internal Function; NOT EXPORTED
 # Returns c("myVariable")
 vStr <- getNameAsString(myVariable)
 }
-
