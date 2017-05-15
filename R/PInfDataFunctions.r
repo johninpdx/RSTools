@@ -727,6 +727,26 @@ getNetworkSet <- function(pWavVec, pSchVec, pElig=1, pDid=1, pTyp="BF",
       #++++++++++++++++
     }
   }
+
+  #++++++++++++++++
+
+  # Find the individuals who do not select anyone
+  # nor are selected by anyone in the dataset
+  isolates<-sidRowID %>%
+    filter(!RID %in% unique(as.numeric(rlpNet$RIDOut)) &
+             !RID %in% unique(as.numeric(rlpNet$RIDIn)))
+  notisolates<-sidRowID %>%
+    filter(RID %in% unique(as.numeric(rlpNet$RIDOut)) |
+             RID %in% unique(as.numeric(rlpNet$RIDIn)))
+  # Isolates at the end of the subject list are not added
+  # automatically by the network package, and must be added
+  # manually.
+  end_isolates<-table((isolates$RID>(notisolates$RID[[length(notisolates$RID)]])))["TRUE"]
+  num_end_isolates<-as.numeric(end_isolates)
+  if (is.na(num_end_isolates)){
+    num_end_isolates<-0
+  }
+
   #++++++++++++++++
 
   # Split networks by wave, if more than one wave
@@ -768,12 +788,18 @@ getNetworkSet <- function(pWavVec, pSchVec, pElig=1, pDid=1, pTyp="BF",
         outNeti <- with (rlpNet2[rlpNet2$WID == pWavVec[i], ],
                          spMatrix(nnodes, nnodes,
                                   RIDOut, RIDIn, x = bff))
+        itemName <- paste("wv", toString(pWavVec[i]), sep = "")
+        outList[[i]] <- outNeti
+        names(outList)[i] <- itemName
       }
       else{
         # This one has no structural 0s
         outNeti <- with (rlpNet[rlpNet$WID == pWavVec[i], ],
                          spMatrix(nnodes, nnodes,
                                   RIDOut, RIDIn, x = bff))
+        itemName <- paste("wv", toString(pWavVec[i]), sep = "")
+        outList[[i]] <- outNeti
+        names(outList)[i] <- itemName
       }
     } else {
       # 'network' format
@@ -783,11 +809,20 @@ getNetworkSet <- function(pWavVec, pSchVec, pElig=1, pDid=1, pTyp="BF",
         outNeti <- network(mtx,
                          directed = TRUE,
                          matrix.type = "edgelist")
+        if (num_end_isolates>0){
+          network::add.vertices(outNeti,num_end_isolates)
+          network.vertex.names(outNeti) = sidRowID$SID
+          itemName <- paste("wv", toString(pWavVec[i]), sep = "")
+          outList[[i]] <- outNeti
+          names(outList)[i] <- itemName
+        } else {
+          network.vertex.names(outNeti) = sidRowID$SID
+          itemName <- paste("wv", toString(pWavVec[i]), sep = "")
+          outList[[i]] <- outNeti
+          names(outList)[i] <- itemName
+        }
       }
     }
-    itemName <- paste("wv", toString(pWavVec[i]), sep = "")
-    outList[[i]] <- outNeti
-    names(outList)[i] <- itemName # name it
   }
   #cccccccccccccccc
   cat("Done constructing network output", "\n")
