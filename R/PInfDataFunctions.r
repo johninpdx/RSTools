@@ -776,11 +776,10 @@ getNetworkSet <- function(pWavVec, pSchVec, pElig=1, pDid=1, pTyp="BF",
                                   RIDOut, RIDIn, x = bff))
       }
     } else {
-      # Notice that 'network' requires the input matrix columns *backwards*
-      # (RIDIn, RIDOut, value). (Note again data.table syntax)
+      # 'network' format
       if (pOut == "NT"){
         mtx <- data.matrix(rlpNet[rlpNet$WID == pWavVec[i],
-                                  .(RIDIn,RIDOut,bff)])
+                                  .(RIDOut,RIDIn,bff)])
         outNeti <- network(mtx,
                          directed = TRUE,
                          matrix.type = "edgelist")
