@@ -195,7 +195,7 @@ getFixedCovs <- function(pSchVec){
 #' # Gets edgelist (with addtional info on some alters) for individuals in
 #' # waves 1, 3, and 4, schools 3:6 and 30 (one school district).
 #' net <- getNetwork(c(1,3,4), c(3,4,5,6,30))
-#' @note Internal function, NOT EXPORTED
+#' @export
 getNetwork <- function(pWavVec,pSchVec){
 #' @import RODBC
 # ____________
@@ -287,7 +287,7 @@ getNQTVCs <- function(pWavVec,pSchVec){
 #' # Returns a vector of SIDs of individuals who were short-survey (NQ)
 #' # eligible at wave 1, from school #3.
 #' nodes <- getNQTVCs(pWav = 1, pSch = 3, pNQW = 1)
-#' @note Internal function, NOT EXPORTED
+#' @export
 getSWNodes <- function(pWav, pSch, pNQW = 1, pFQW = 0){
 #' @import RODBC
 #' @import data.table
@@ -1591,7 +1591,7 @@ netVtxAttr <- function(pAttrMasterDF,pSIDVec,pNetwork) {
 #'     the 30 day variables to be used in analyses under such circumstances,
 #'     instead of being missing.
 #' @note This function is a helper function for 'makeTVTbl'.
-#'     NOT EXPORTED
+#' @export
 zero30dSU <- function(pDT){
 #' @import data.table
 #' @import dtplyr
@@ -1632,6 +1632,9 @@ getNameAsString <- function(pVarName){
 }
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-# 'Without' operator (complement of %in%):
+#' 'Without' operator (complement of %in%):
+#' @details A binary operator, i.e. x %w/o% y (x and y vectors, or lists) gives
+#'    the elements of x that are NOT IN y.
+#' @export
 "%w/o%" <- function(x,y) x[!x %in% y] #Bin operator, x NOT IN y (vectors)
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
