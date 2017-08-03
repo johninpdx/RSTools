@@ -982,6 +982,8 @@ makeSAOMNet <- function(pNetInput){
 #'     B3 (Binge drinking, freq in last 30 days),
 #'     M3 (Marijuana use, freq in last 30 days),
 #'     AL (Alcohol, freq of use, lifetime up to now).
+#'     BL (Binge drinking, freq of use, lifetime up to now).
+#'     ML (Marijuana use, freq of use, lifetime up to now).
 #' @examples
 #' # When the network part of an analysis set is created by 'getNetworkSet',
 #' # the last element of the output is a vector of participating SIDs. We
@@ -1412,14 +1414,16 @@ createNewOnset <- function(pInDT,pTHold=1){
 #'     B3 (Binge drinking, freq in last 30 days),
 #'     M3 (Marijuana use, freq in last 30 days),
 #'     AL (Alcohol, freq of use, lifetime)
+#'     BL (Binge, freq of use, lifetime)
+#'     ML (Marijuana, freq of use, lifetime)
 #' @examples
 #' # Internal function, not normally available to users. See 'makeTVTbl'
 #' # source code to see how it is used.
 #' @note NOT EXPORTED
 getTVCCols <- function(pVar){
   if (!(pVar %in% c("AB", "OV", "YV", " T3", "E3", "C3", "A3",
-                    "B3", "M3","AL"))){
-    stop("Error: Var must be AB, OV, YV, T3, E3, C3, A3, B3, M3, AL")
+                    "B3", "M3","AL","BL","ML"))){
+    stop("Error: Var must be AB, OV, YV, T3, E3, C3, A3, B3, M3, AL, BL, ML")
   }
   if (pVar == "AB"){
     # Antisocial behavior
@@ -1461,6 +1465,14 @@ getTVCCols <- function(pVar){
   if (pVar == "AL"){
     # Alc Lifetime Freq
     outCols <- c("AlcLife")
+  }
+  if (pVar == "BL"){
+    # Binge drinking Lifetime Freq
+    outCols <- c("BngLife")
+  }
+  if (pVar == "ML"){
+    # Marijuana Lifetime Freq
+    outCols <- c("MJLife")
   }
   return(outCols)
 }
