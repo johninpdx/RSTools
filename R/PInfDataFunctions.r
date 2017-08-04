@@ -727,6 +727,26 @@ getNetworkSet <- function(pWavVec, pSchVec, pElig=1, pDid=1, pTyp="BF",
       #++++++++++++++++
     }
   }
+
+  #++++++++++++++++
+
+  # Find the individuals who do not select anyone
+  # nor are selected by anyone in the dataset
+  isolates<-sidRowID %>%
+    filter(!RID %in% unique(as.numeric(rlpNet$RIDOut)) &
+             !RID %in% unique(as.numeric(rlpNet$RIDIn)))
+  notisolates<-sidRowID %>%
+    filter(RID %in% unique(as.numeric(rlpNet$RIDOut)) |
+             RID %in% unique(as.numeric(rlpNet$RIDIn)))
+  # Isolates at the end of the subject list are not added
+  # automatically by the network package, and must be added
+  # manually.
+  end_isolates<-table((isolates$RID>(notisolates$RID[[length(notisolates$RID)]])))["TRUE"]
+  num_end_isolates<-as.numeric(end_isolates)
+  if (is.na(num_end_isolates)){
+    num_end_isolates<-0
+  }
+
   #++++++++++++++++
 
   # Split networks by wave, if more than one wave
@@ -768,12 +788,18 @@ getNetworkSet <- function(pWavVec, pSchVec, pElig=1, pDid=1, pTyp="BF",
         outNeti <- with (rlpNet2[rlpNet2$WID == pWavVec[i], ],
                          spMatrix(nnodes, nnodes,
                                   RIDOut, RIDIn, x = bff))
+        itemName <- paste("wv", toString(pWavVec[i]), sep = "")
+        outList[[i]] <- outNeti
+        names(outList)[i] <- itemName
       }
       else{
         # This one has no structural 0s
         outNeti <- with (rlpNet[rlpNet$WID == pWavVec[i], ],
                          spMatrix(nnodes, nnodes,
                                   RIDOut, RIDIn, x = bff))
+        itemName <- paste("wv", toString(pWavVec[i]), sep = "")
+        outList[[i]] <- outNeti
+        names(outList)[i] <- itemName
       }
     } else {
       # 'network' format
@@ -783,11 +809,20 @@ getNetworkSet <- function(pWavVec, pSchVec, pElig=1, pDid=1, pTyp="BF",
         outNeti <- network(mtx,
                          directed = TRUE,
                          matrix.type = "edgelist")
+        if (num_end_isolates>0){
+          network::add.vertices(outNeti,num_end_isolates)
+          network.vertex.names(outNeti) = sidRowID$SID
+          itemName <- paste("wv", toString(pWavVec[i]), sep = "")
+          outList[[i]] <- outNeti
+          names(outList)[i] <- itemName
+        } else {
+          network.vertex.names(outNeti) = sidRowID$SID
+          itemName <- paste("wv", toString(pWavVec[i]), sep = "")
+          outList[[i]] <- outNeti
+          names(outList)[i] <- itemName
+        }
       }
     }
-    itemName <- paste("wv", toString(pWavVec[i]), sep = "")
-    outList[[i]] <- outNeti
-    names(outList)[i] <- itemName # name it
   }
   #cccccccccccccccc
   cat("Done constructing network output", "\n")
@@ -947,6 +982,8 @@ makeSAOMNet <- function(pNetInput){
 #'     B3 (Binge drinking, freq in last 30 days),
 #'     M3 (Marijuana use, freq in last 30 days),
 #'     AL (Alcohol, freq of use, lifetime up to now).
+#'     BL (Binge drinking, freq of use, lifetime up to now).
+#'     ML (Marijuana use, freq of use, lifetime up to now).
 #' @examples
 #' # When the network part of an analysis set is created by 'getNetworkSet',
 #' # the last element of the output is a vector of participating SIDs. We
@@ -1377,14 +1414,16 @@ createNewOnset <- function(pInDT,pTHold=1){
 #'     B3 (Binge drinking, freq in last 30 days),
 #'     M3 (Marijuana use, freq in last 30 days),
 #'     AL (Alcohol, freq of use, lifetime)
+#'     BL (Binge, freq of use, lifetime)
+#'     ML (Marijuana, freq of use, lifetime)
 #' @examples
 #' # Internal function, not normally available to users. See 'makeTVTbl'
 #' # source code to see how it is used.
 #' @note NOT EXPORTED
 getTVCCols <- function(pVar){
   if (!(pVar %in% c("AB", "OV", "YV", " T3", "E3", "C3", "A3",
-                    "B3", "M3","AL"))){
-    stop("Error: Var must be AB, OV, YV, T3, E3, C3, A3, B3, M3, AL")
+                    "B3", "M3","AL","BL","ML"))){
+    stop("Error: Var must be AB, OV, YV, T3, E3, C3, A3, B3, M3, AL, BL, ML")
   }
   if (pVar == "AB"){
     # Antisocial behavior
@@ -1426,6 +1465,14 @@ getTVCCols <- function(pVar){
   if (pVar == "AL"){
     # Alc Lifetime Freq
     outCols <- c("AlcLife")
+  }
+  if (pVar == "BL"){
+    # Binge drinking Lifetime Freq
+    outCols <- c("BngLife")
+  }
+  if (pVar == "ML"){
+    # Marijuana Lifetime Freq
+    outCols <- c("MJLife")
   }
   return(outCols)
 }

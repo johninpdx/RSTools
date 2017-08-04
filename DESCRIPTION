@@ -1,9 +1,11 @@
 Package: RSTools
 Type: Package
 Title: Data Mangement Tools for RSiena and Other Network Packages
-Version: 0.3.4
-Authors@R: person("John", "Light", email = "jlight@ori.org",
-    role = c("aut", "cre"))
+Version: 0.3.5
+Authors@R: c(person("John", "Light", email = "jlight@ori.org",
+    role = c("aut", "cre")),
+             person("Kate", "Mills", email = "kmills@ori.org",
+    role = c("ctb")))
 Maintainer: John Light <jlight@ori.org>
 Description: Implements a three-tier client-server architecture to create
     data containers that can be used for dynamic social network modeling
