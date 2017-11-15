@@ -33,8 +33,6 @@ This function will not necessarily return correct SIDs if the
     code should always check this first! If 'checkEligUpdate' returns
     FALSE, you're OK. If not, the code should first run
     'updateStuEligWin'
-
-Internal function, NOT EXPORTED
 }
 \examples{
 # Returns a vector of SIDs of individuals who were short-survey (NQ)

@@ -58,6 +58,8 @@ Choices for pVar are defined in 'getTVCCols'. They are:
     B3 (Binge drinking, freq in last 30 days),
     M3 (Marijuana use, freq in last 30 days),
     AL (Alcohol, freq of use, lifetime up to now).
+    BL (Binge drinking, freq of use, lifetime up to now).
+    ML (Marijuana use, freq of use, lifetime up to now).
 }
 \examples{
 # When the network part of an analysis set is created by 'getNetworkSet',

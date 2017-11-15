@@ -1,7 +1,7 @@
 Package: RSTools
 Type: Package
 Title: Data Mangement Tools for RSiena and Other Network Packages
-Version: 0.3.5
+Version: 0.4.0
 Authors@R: c(person("John", "Light", email = "jlight@ori.org",
     role = c("aut", "cre")),
              person("Kate", "Mills", email = "kmills@ori.org",
