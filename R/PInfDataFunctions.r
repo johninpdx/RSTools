@@ -1535,6 +1535,37 @@ makeCCVec <- function(pElig){
 }
 
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+#  >> make01MemberMatrix <<
+#______________________________________________________________________________
+#' Creates a matrix indicating membership in a group based on a variable
+#'
+#' Membership is assumed to be described by a set of integers stored in
+#' the variable.
+#'
+#' @param pInDT a data.table with two columns: SID and some integer
+#'   variable
+#' @param pPrefix a string indicating the prefix to give to each
+#'    category-specific column of the output
+#' @return A data.table with the same two columns as the input DT, plus
+#'    k new columns, one for each unique category (i.e. value) in the
+#'    2nd column of pInDT. Let 'str' be the value of 'pPrefix'; and suppose
+#'    the categories are numbered 1, 2, ... then
+#'    the columns will have the names str1, str2, etc.
+#' @export
+make01MemberMatrix <- function(pInDT,pPrefix){
+  #' @import data.table
+  categoryVec <- sort(as.vector(unique(pInDT[[2]])))
+  memberMatrix <- pInDT
+  for(i in 1:length(categoryVec)){
+    colName <- paste(pPrefix, i, sep="")
+    memberMatrix <- mutate(memberMatrix, newCol =
+                             ifelse(pInDT[[2]] == categoryVec[i],1,0))
+    names(memberMatrix)[2+i]<- colName
+  }
+  return(memberMatrix)
+}
+
+#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 # >> netvtxAttr <<
 # _____________________________________________________________________________
 #' Returns a dataframe DF with col.2 a suitable 'network' node attribute.
