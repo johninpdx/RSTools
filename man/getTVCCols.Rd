@@ -33,6 +33,8 @@ Choices for pVar are:
     B3 (Binge drinking, freq in last 30 days),
     M3 (Marijuana use, freq in last 30 days),
     AL (Alcohol, freq of use, lifetime)
+    BL (Binge, freq of use, lifetime)
+    ML (Marijuana, freq of use, lifetime)
 
 NOT EXPORTED
 }
